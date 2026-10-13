@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Refuses to run inside another site's frame (clickjacking: a page that
+     overlays this one could trick a tap onto "delete" or "check in").
+     GitHub Pages can't send X-Frame-Options / CSP frame-ancestors headers,
+     and browsers ignore frame-ancestors in a <meta> tag, so this is the
+     page-level equivalent: hide everything, then try to break out. -->
+<script>if (window.top !== window.self) { document.documentElement.style.display = 'none'; try { window.top.location = window.self.location.href; } catch (e) {} }</script>
+<!-- If one of this page's own script files fails to download (a weak phone
+     signal), the page would open half-working with no message — a dashboard
+     with no invite link, a login button that does nothing. Offer a reload. -->
+<script>window.addEventListener('error', function (e) {
+  var t = e.target;
+  if (!t || t.tagName !== 'SCRIPT' || !t.src || t.src.indexOf(location.origin + '/') !== 0) return;
+  function show() {
+    if (document.getElementById('load-fail')) return;
+    var d = document.createElement('div');
+    d.id = 'load-fail'; d.setAttribute('role', 'alert');
+    d.textContent = '⚠️ ما اكتمل تحميل الصفحة بسبب ضعف الإنترنت — اضغط هنا لإعادة التحميل';
+    d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:100000;background:#b3261e;color:#fff;padding:14px 16px;text-align:center;font:600 15px/1.6 sans-serif;cursor:pointer;';
+    d.onclick = function () { location.reload(); };
+    document.body.appendChild(d);
+  }
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show);
+}, true);</script>
+<!-- Loading marks (milliseconds since navigation) are always recorded, but
+     the small line under the loading message only shows with ?timing=1 or
+     when loading gets stuck (25 s), so a stall on the home-screen app, where
+     no ?timing=1 can be typed, can still be photographed. -->
+<script>var TM = { m: [], err: '', stuck: false, param: /[?&]timing=1(&|$)/.test(location.search) }; TM.show = TM.param;
+var TM_HOST = 'auth-loading', TM_RES = ['supabase.min.js', 'data.js', 'utils.js', 'icons.js', 'format.js'];
+function tmShow() {
+  var host = document.getElementById(TM_HOST);
+  if (!TM.show || !host) return;
+  var line = document.getElementById('timing-line');
+  // Shown only because the page got stuck: once it recovers, the line goes
+  // with the loading message instead of staying on top of the page.
+  if (host.style.display === 'none' && !TM.param) {
+    if (line) line.remove();
+    return;
+  }
+  if (!line) {
+    line = document.createElement('div');
+    line.id = 'timing-line';
+    line.style.cssText = 'direction:ltr;text-align:left;font:11px/1.6 monospace;color:#8d8a84;word-break:break-all;padding:0 18px 16px;-webkit-user-select:text;user-select:text;';
+    host.parentNode.insertBefore(line, host.nextSibling);
+  }
+  var res = [];
+  try {
+    var es = performance.getEntriesByType('resource');
+    for (var i = 0; i < TM_RES.length; i++) {
+      var d = '…';
+      for (var j = 0; j < es.length; j++) {
+        if (es[j].name.split('?')[0].slice(-TM_RES[i].length - 1) === '/' + TM_RES[i]) { d = Math.round(es[j].duration); break; }
+      }
+      res.push(TM_RES[i] + ':' + d);
+    }
+  } catch (e) {}
+  var sw = 'sw:' + (navigator.serviceWorker && navigator.serviceWorker.controller ? 'yes' : 'no');
+  line.textContent = TM.m.join(' | ') + ' || ' + res.join(' ') + ' || ' + sw + (TM.err ? ' || err: ' + TM.err : '');
+}
+function tmProbe(label, fn) {
+  var t0 = performance.now(), done = false;
+  var to = setTimeout(function () { if (!done) { done = true; tmark(label + ' hang'); } }, 5000);
+  function fin(res) {
+    if (done) return;
+    done = true; clearTimeout(to);
+    tmark(label + ' ' + res + ' ' + Math.round(performance.now() - t0) + 'ms');
+  }
+  try { fn(fin); } catch (e) { fin('err'); }
+}
+function tmProbes(cacheFn) {
+  try {
+    var sa = navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    tmark('standalone ' + (sa ? 'yes' : 'no') + ' hist ' + history.length);
+  } catch (e) {}
+  tmProbe('idb', function (fin) {
+    var r = indexedDB.open('__probe');
+    r.onsuccess = function () { try { r.result.close(); var dr = indexedDB.deleteDatabase('__probe'); dr.onblocked = dr.onerror = function () {}; } catch (e) {} fin('ok'); };
+    r.onerror = function () { fin('err'); };
+  });
+  if (cacheFn) tmProbe('cache', cacheFn);
+  tmProbe('net', function (fin) {
+    fetch((window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || 'https://gunizkapwatixvbfliva.supabase.co/', { mode: 'no-cors', cache: 'no-store' }).then(function () { fin('ok'); }, function () { fin('err'); });
+  });
+}
+function tmark(k) {
+  TM.m.push(k + ' ' + Math.round(performance.now()));
+  if (TM.show) console.log('timing:', k, Math.round(performance.now()));
+  tmShow();
+}
+function tmErr(msg) {
+  if (TM.err) return;
+  TM.err = String(msg).slice(0, 120);
+  tmShow();
+}
+{
+  window.addEventListener('error', function (e) { if (e.message) tmErr(e.message); });
+  window.addEventListener('unhandledrejection', function (e) { tmErr(e.reason && e.reason.message || e.reason); });
+  document.addEventListener('DOMContentLoaded', tmShow);
+}
+tmark('script');</script>
+<title>لوحة المنظّم | دعوات</title>
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://gunizkapwatixvbfliva.supabase.co" crossorigin>
+<style>
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-400-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-500-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-700-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Playfair Display';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/playfair-display-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Reem Kufi';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/reem-kufi-700-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'Reem Kufi';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/reem-kufi-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'IBM Plex Sans Arabic',sans-serif; background:#0A0A0A; color:#FAF8F4; min-height:100vh; }
+  .wrap { max-width:480px; margin:0 auto; padding:32px 18px 60px; }
+  h1 { font-family:'Playfair Display',serif; color:#E0BC7A; font-size:26px; text-align:center; margin-bottom:6px; }
+  .sub { text-align:center; color:#B8B4AC; font-size:13px; margin-bottom:28px; }
+  .msg { text-align:center; padding:60px 20px; color:#B8B4AC; }
+  .card { background:rgba(255,255,255,0.04); border:1px solid rgba(224,188,122,0.2); border-radius:16px; padding:22px; margin-bottom:16px; }
+  input { width:100%; padding:13px 14px; margin-bottom:12px; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(224,188,122,0.25); color:#FAF8F4; font-size:15px; font-family:inherit; }
+  input:focus { outline:none; border-color:#E0BC7A; }
+  /* Safari (notably iOS) renders <input type="date">'s native calendar
+     icon/segment layout with its own default light-theme chrome, which
+     throws off its effective box compared to sibling text inputs even with
+     identical width/padding — that's the misaligned date field. Stripping
+     the native appearance and declaring the color scheme lets our own
+     border/background/padding fully control the box like any other input. */
+  input[type="date"] { appearance:none; -webkit-appearance:none; color-scheme:dark; }
+  /* iOS Safari ignores placeholder on date inputs (an empty one shows blank), so the field gets a visible label. */
+  .type-picker { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+  .type-btn { display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 6px 10px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(224,188,122,0.2); color:#B8B4AC; font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.2s ease; }
+  .type-btn img { height:38px; width:auto; opacity:0.55; transition:opacity 0.2s ease; }
+  .type-btn:hover { border-color:rgba(224,188,122,0.45); }
+  .type-btn.on { background:rgba(224,188,122,0.12); border-color:#E0BC7A; color:#E0BC7A; box-shadow:0 0 0 1px #E0BC7A inset; }
+  .type-btn.on img { opacity:1; }
+  .date-label { display:block; font-size:12px; color:#B8B4AC; margin:0 4px 4px; }
+  .btn:disabled { opacity:0.7; cursor:default; }
+  svg.ic { flex-shrink:0; vertical-align:middle; }
+  .event-meta { display:flex; flex-wrap:wrap; gap:4px 12px; }
+  .event-meta span { display:inline-flex; align-items:center; gap:4px; }
+  .event-meta svg.ic { color:#E0BC7A; }
+  .event-stats .att-bar { flex-basis:100%; margin-top:2px; }
+  .att-row { display:flex; justify-content:space-between; font-size:11.5px; color:#B8B4AC; margin-bottom:5px; }
+  .att-pct { color:#7fd48a; font-weight:600; }
+  .att-track { height:6px; border-radius:99px; background:rgba(255,255,255,0.06); overflow:hidden; }
+  .att-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#4CAF50,#7fd48a); }
+  .chip { width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(224,188,122,0.12); color:#E0BC7A; }
+  .btn { width:100%; padding:13px; border:none; border-radius:10px; background:linear-gradient(135deg,#C99B4A,#E0BC7A); color:#1a1400; font-weight:700; font-size:15px; cursor:pointer; margin-bottom:10px; }
+  .btn.ghost { background:transparent; border:1px solid rgba(224,188,122,0.3); color:#E0BC7A; }
+  .btn.small { width:auto; padding:8px 16px; font-size:13px; }
+  .toggle-row { text-align:center; font-size:13px; color:#B8B4AC; margin-top:4px; }
+  .toggle-row a { color:#E0BC7A; cursor:pointer; text-decoration:underline; }
+  .err { color:#ff9d9d; font-size:13px; margin-bottom:10px; text-align:center; }
+  .ok { color:#7fd48a; font-size:13px; margin-bottom:10px; text-align:center; line-height:1.8; }
+  .notice-card { text-align:center; }
+  .notice-card .chip { width:44px; height:44px; border-radius:12px; margin:0 auto 12px; }
+  .notice-card .event-name { font-size:17px; margin-bottom:8px; }
+  .notice-card .sub { margin-bottom:18px; line-height:1.8; }
+  .event-card { display:flex; flex-direction:column; gap:12px; }
+  .event-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  /* min-width:0 + anywhere-wrapping: a long email or event name breaks onto
+     the next line instead of pushing the card wider than a phone screen. */
+  .event-card-top > div:first-child { min-width:0; flex:1; }
+  .event-name { font-weight:700; color:#E0BC7A; font-size:15px; overflow-wrap:anywhere; }
+  .event-date { color:#B8B4AC; font-size:12px; margin-top:3px; overflow-wrap:anywhere; }
+  .event-stats { display:flex; gap:8px; flex-wrap:wrap; }
+  .event-stat { flex:1; text-align:center; background:rgba(224,188,122,0.06); border:1px solid rgba(224,188,122,0.15); border-radius:10px; padding:8px 4px; }
+  .event-stat .n { font-weight:700; color:#FAF8F4; font-size:15px; }
+  .event-stat .l { color:#8a857a; font-size:10.5px; margin-top:1px; }
+  .event-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; }
+  .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+  #hidden-forms > div { display:none; }
+  .empty { text-align:center; color:#6f6a62; font-size:14px; padding:20px 0; }
+  .acc-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .acc-tag { font-size:11px; padding:2px 8px; border-radius:99px; border:1px solid rgba(224,188,122,0.25); color:#B8B4AC; white-space:nowrap; }
+  .acc-tag.paid { color:#4CAF50; border-color:rgba(76,175,80,0.45); background:rgba(76,175,80,0.08); }
+  .acc-tag.trial { color:#E0BC7A; }
+  .acc-tag.none { opacity:0.7; }
+  .acc-row { cursor:pointer; }
+  .acc-row:hover { border-color:rgba(224,188,122,0.45); }
+  .acc-filters { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+  .acc-filter { background:transparent; border:1px solid rgba(224,188,122,0.25); color:#B8B4AC; font-family:inherit; font-size:12px; padding:5px 12px; border-radius:99px; cursor:pointer; }
+  .acc-filter.on { background:rgba(224,188,122,0.15); border-color:#E0BC7A; color:#E0BC7A; font-weight:700; }
+  .owner-filter-bar { display:none; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px; margin-bottom:12px; border-radius:12px; border:1px solid rgba(224,188,122,0.35); background:rgba(224,188,122,0.08); font-size:13px; color:#FAF8F4; }
+  .owner-filter-bar b { color:#E0BC7A; direction:ltr; display:inline-block; }
+  .badge-count { background:#F44336; color:#fff; font-size:11px; font-weight:700; min-width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; padding:0 4px; }
+  /* Fixed to the TOP of the viewport, not the bottom — this page can get
+     long (many events), and a toast anchored to the bottom of the screen
+     is easy to miss entirely if you're scrolled up reading the top, or to
+     lose before you scroll down to where it is. Top-fixed means it's
+     always the first thing in view regardless of scroll position. */
+  #toast { position:fixed; left:50%; top:16px; transform:translateX(-50%) translateY(-20px); background:rgba(20,18,14,0.95); color:#E0BC7A; border:1px solid rgba(224,188,122,0.35); padding:12px 20px; border-radius:30px; font-size:13px; opacity:0; pointer-events:none; transition:all 0.25s ease; z-index:1000; max-width:90vw; text-align:center; }
+  #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  #splash { position:fixed; top:0; right:0; bottom:0; left:0; z-index:9999; display:flex; align-items:center; justify-content:center; transition:opacity 0.8s ease, visibility 0.8s ease; overflow:hidden; background:radial-gradient(ellipse at center, #14120e 0%, #0A0A0A 70%); }
+  #splash::before { content:''; position:absolute; width:460px; height:460px; border-radius:50%; background:radial-gradient(circle, rgba(224,188,122,0.12), transparent 70%); animation:splashPulse 3.5s ease-in-out infinite; }
+  #splash.hide { opacity:0; visibility:hidden; }
+  .splash-inner { text-align:center; position:relative; z-index:1; animation:splashFade 1.2s cubic-bezier(0.2,0.8,0.2,1); }
+  .splash-rings { animation:splashRingsIn 1.4s cubic-bezier(0.2,0.8,0.2,1), splashFloat 3.5s ease-in-out 1.4s infinite; margin-bottom:26px; filter:drop-shadow(0 6px 26px rgba(224,188,122,0.45)); }
+  .splash-title { font-family:'Reem Kufi','Playfair Display',sans-serif; font-size:42px; font-weight:700; color:#E0BC7A; letter-spacing:1px; margin-bottom:8px; text-shadow:0 2px 24px rgba(224,188,122,0.3); }
+  .splash-subtitle { font-family:'Playfair Display',serif; font-size:16px; font-weight:400; color:#E0BC7A; letter-spacing:6px; text-transform:uppercase; opacity:0.75; margin-bottom:4px; }
+  .splash-line { width:0; height:2px; background:linear-gradient(90deg,transparent,#E0BC7A,transparent); margin:20px auto 0; animation:splashLineGrow 1.6s ease-out 0.6s forwards; }
+  @keyframes splashFade { from { opacity:0; transform:translateY(20px) scale(0.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+  @keyframes splashRingsIn { from { opacity:0; transform:scale(0.7) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  @keyframes splashFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-6px); } }
+  @keyframes splashLineGrow { from { width:0; } to { width:140px; } }
+  @keyframes splashPulse { 0%,100% { transform:scale(0.9); opacity:0.5; } 50% { transform:scale(1.1); opacity:1; } }
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="splash-inner">
+    <div class="splash-rings"><img src="icons/logo.svg" alt="" width="104" height="104" style="display:block; margin:0 auto;"></div>
+    <div class="splash-title">دعوات</div>
+    <div class="splash-subtitle">Digital Invitations</div>
+    <div class="splash-line"></div>
+  </div>
+</div>
+<script>
+// Isolated on purpose, and NOT gated on window.load — if this lived inside
+// the big application script below and something earlier in that script
+// threw (a slow/failed CDN script, a bug, a bad connection), the splash
+// would never get hidden and would block the real page forever. This one
+// line is all this tiny script does, so nothing else on the page can
+// prevent it from running.
+setTimeout(() => {
+  const splash = document.getElementById('splash');
+  if (splash) splash.classList.add('hide');
+}, 2200);
+</script>
+
+<div id="toast"></div>
+<div class="wrap">
+
+  <div id="auth-loading" class="msg">جاري التحميل...</div>
+
+  <div id="auth-view" style="display:none">
+    <h1><a href="index.html" style="color:inherit; text-decoration:none;">دعوات</a></h1>
+    <div class="sub" id="auth-sub">لوحة تحكم المنظّم — أنشئ دعوة رقمية لمناسبتك</div>
+    <div class="card" id="auth-card">
+      <div id="auth-err" class="err" style="display:none"></div>
+      <div id="auth-ok" class="ok" style="display:none"></div>
+      <!-- A real form, so the phone keyboard's "Go" key submits it. -->
+      <form id="auth-form" onsubmit="event.preventDefault(); submitAuth();" novalidate>
+        <input type="email" id="auth-email" placeholder="البريد الإلكتروني" autocomplete="email" inputmode="email" autocapitalize="off" enterkeyhint="next">
+        <input type="password" id="auth-pass" placeholder="كلمة المرور" autocomplete="current-password" enterkeyhint="go">
+        <button type="submit" class="btn" id="auth-submit-btn">دخول</button>
+      </form>
+      <div class="toggle-row" id="resend-row" style="display:none">لم يصلك الرابط؟ <a onclick="resendConfirmation()">أعد إرسال رابط التفعيل</a></div>
+      <div class="toggle-row" id="auth-toggle">ليس لديك حساب؟ <a onclick="toggleAuthMode()">أنشئ حساب</a></div>
+      <div class="toggle-row" id="forgot-pass-row"><a onclick="sendResetEmail()">نسيت كلمة المرور؟</a></div>
+      <div class="toggle-row"><a href="privacy.html" style="display:inline-block; padding:14px 10px;">الخصوصية والشروط</a></div>
+    </div>
+
+    <div class="card notice-card" id="check-email-card" style="display:none">
+      <div class="chip"><i data-ic="inbox" data-size="22"></i></div>
+      <div class="event-name">تفقّد بريدك</div>
+      <div class="sub">أرسلنا رابط التفعيل إلى <b id="check-email-addr" style="color:#E0BC7A; direction:ltr; display:inline-block; overflow-wrap:anywhere;"></b><br>افتحه عشان تكمل. لو ما وصلك، شوف السبام.</div>
+      <div id="check-email-err" class="err" style="display:none"></div>
+      <button type="button" class="btn" id="check-resend-btn" onclick="resendConfirmation()">أعد إرسال الرابط</button>
+      <div class="toggle-row"><a onclick="backToLogin()">رجوع لتسجيل الدخول</a></div>
+    </div>
+
+    <div class="card" id="recovery-card" style="display:none">
+      <div class="sub" id="recovery-account" style="margin-bottom:16px; line-height:1.8;">حساب: <span id="recovery-email" style="direction:ltr; display:inline-block; overflow-wrap:anywhere; unicode-bidi:isolate;"></span></div>
+      <div id="recovery-err" class="err" style="display:none"></div>
+      <form id="recovery-form" onsubmit="event.preventDefault(); submitNewPassword();" novalidate>
+        <input type="password" id="new-pass" placeholder="كلمة المرور الجديدة" autocomplete="new-password" enterkeyhint="next">
+        <input type="password" id="new-pass2" placeholder="أعد كتابة كلمة المرور" autocomplete="new-password" enterkeyhint="go">
+        <button type="submit" class="btn" id="recovery-submit-btn">حفظ كلمة المرور</button>
+      </form>
+      <div class="toggle-row"><a onclick="cancelRecovery()">إلغاء</a></div>
+    </div>
+  </div>
+
+  <div id="app-view" style="display:none">
+    <div class="topbar">
+      <h1 style="margin:0; font-size:20px;" id="events-heading">مناسباتي</h1>
+      <div style="display:flex; gap:8px;">
+        <button class="btn ghost small" onclick="location.reload()" title="تحديث الصفحة" aria-label="تحديث الصفحة" style="width:auto; padding:8px 12px;"><i data-ic="refresh-cw" data-size="16"></i></button>
+        <button class="btn ghost small" onclick="doLogout()"><i data-ic="log-out" data-size="15"></i> خروج</button>
+      </div>
+    </div>
+    <div class="sub" style="margin-bottom:20px;">
+      مسجّل دخول بحساب: <span id="current-email" style="color:#E0BC7A"></span>
+      · <a href="guide.html" style="color:#E0BC7A; text-decoration:underline;"><i data-ic="book-open" data-size="14"></i> دليل الاستخدام</a>
+    </div>
+
+    <div id="admin-unpaid-section" style="display:none; margin-bottom:16px;">
+      <div class="card" onclick="document.getElementById('events-list').scrollIntoView({behavior:'smooth'})" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; margin-bottom:0;">
+        <span class="sub" style="margin:0; display:inline-flex; align-items:center; gap:8px;"><span class="chip"><i data-ic="lock" data-size="16"></i></span> مناسبات غير مدفوعة بالقائمة تحت</span>
+        <span class="badge-count" id="admin-unpaid-badge">0</span>
+      </div>
+    </div>
+
+    <div id="admin-requests-section" style="display:none; margin-bottom:16px;">
+      <div class="sub" style="margin-bottom:8px; text-align:right; display:flex; align-items:center; justify-content:flex-end; gap:8px;">
+        <i data-ic="hand" data-size="15"></i> طلبات مناسبات إضافية
+        <span class="badge-count" id="admin-requests-badge">0</span>
+      </div>
+      <div id="admin-requests-list"></div>
+    </div>
+
+    <div id="admin-accounts-section" style="display:none; margin-bottom:16px;">
+      <div class="card" id="admin-accounts-toggle" onclick="toggleAllAccounts()" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; margin-bottom:0;">
+        <span class="sub" style="margin:0; display:inline-flex; align-items:center; gap:8px;"><span class="chip"><i data-ic="users" data-size="16"></i></span> كل الحسابات المسجّلة <span id="admin-accounts-arrow" style="color:#E0BC7A">▾</span></span>
+        <span class="badge-count" id="admin-accounts-badge">0</span>
+      </div>
+      <div id="admin-accounts-body" style="display:none; margin-top:10px;">
+        <input type="text" id="admin-accounts-search" placeholder="ابحث بالإيميل" oninput="renderAllAccounts()" style="margin-bottom:10px;">
+        <div class="acc-filters" id="admin-accounts-filters">
+          <button class="acc-filter on" data-f="all" onclick="setAccountsFilter('all')">الكل</button>
+          <button class="acc-filter" data-f="paid" onclick="setAccountsFilter('paid')">عندهم مناسبة مفعّلة</button>
+          <button class="acc-filter" data-f="trial" onclick="setAccountsFilter('trial')">يجرّبون</button>
+          <button class="acc-filter" data-f="none" onclick="setAccountsFilter('none')">بدون مناسبة</button>
+        </div>
+        <div id="admin-accounts-list"></div>
+      </div>
+    </div>
+
+    <button class="btn" id="create-toggle-btn" onclick="showCreateForm()" style="display:none"><i data-ic="plus" data-size="17"></i> إنشاء مناسبة جديدة</button>
+    <div id="limit-box" style="display:none; margin-bottom:16px;">
+      <div class="sub" id="limit-box-msg" style="margin-bottom:10px;">وصلت لحد مناسباتك الحالي.</div>
+      <button class="btn ghost" id="request-more-btn" style="width:100%;"><i data-ic="hand" data-size="16"></i> اطلب مناسبة إضافية</button>
+      <div class="sub" id="pending-request-msg" style="display:none;">⏳ طلبك قيد المراجعة، بننبّهك أول ما يتم الرد.</div>
+    </div>
+
+    <form class="card" id="create-form" style="display:none" onsubmit="event.preventDefault(); createNewEvent();" novalidate>
+      <div class="date-label">نوع المناسبة</div>
+      <div class="type-picker" id="ev-type-picker" role="radiogroup" aria-label="نوع المناسبة">
+        <button type="button" class="type-btn" data-type="wedding" role="radio" aria-checked="false" onclick="pickEventType('wedding')"><img src="icons/kind-wedding.svg" alt="">زفاف</button>
+        <button type="button" class="type-btn" data-type="graduation" role="radio" aria-checked="false" onclick="pickEventType('graduation')"><img src="icons/kind-graduation.svg" alt="">تخرج</button>
+        <button type="button" class="type-btn" data-type="event" role="radio" aria-checked="false" onclick="pickEventType('event')"><img src="icons/kind-event.svg" alt="">فعالية</button>
+      </div>
+      <input type="text" id="ev-name" maxlength="80" placeholder="اسم المناسبة (مثال: زفاف حسن وفاطمة)" enterkeyhint="next">
+      <label for="ev-date" class="date-label"><i data-ic="calendar" data-size="14"></i> تاريخ المناسبة</label>
+      <input type="date" id="ev-date">
+      <input type="text" id="ev-venue" maxlength="100" placeholder="مكان الحفل">
+      <input type="text" id="ev-maps" maxlength="300" placeholder="رابط الموقع على الخريطة (اختياري)">
+      <div style="display:flex; gap:10px;">
+        <button type="submit" class="btn" id="create-submit-btn" style="flex:2">إنشاء</button>
+        <button type="button" class="btn ghost" id="create-cancel-btn" style="flex:1" onclick="cancelCreateForm()">إلغاء</button>
+      </div>
+    </form>
+
+    <div class="owner-filter-bar" id="owner-filter-bar"><span>مناسبات <b id="owner-filter-email"></b></span><button class="btn ghost small" style="margin:0;" onclick="setOwnerFilter(null)">عرض الكل</button></div>
+    <div id="events-list"></div>
+  </div>
+
+</div>
+
+<!-- async: nothing on the page waits for it (notifyAdmin initialises it on
+     first use). As a plain script it held up everything after it, sign-in
+     included, for as long as the CDN took to answer. -->
+<script async src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="vendor/supabase.min.js"></script>
+<script src="data.js"></script>
+<script src="icons.js"></script>
+<script src="utils.js"></script>
+<script src="format.js"></script>
+<script>
+// ADMIN_EMAILS/isAdmin, FREE_GUEST_LIMIT, EMAILJS_*/notifyAdmin, and
+// showToast now live in utils.js (shared with event.html and scan.html) —
+// they used to be copy-pasted separately into each page.
+let authMode = 'login'; // or 'signup'
+let recovering = false; // the set-new-password screen is up: auth changes must not open the app
+let pendingConfirmEmail = '';
+
+const AUTH_SUB = 'لوحة تحكم المنظّم — أنشئ دعوة رقمية لمناسبتك';
+function showAuthCard(which) {
+  document.getElementById('auth-card').style.display = which === 'login' ? 'block' : 'none';
+  document.getElementById('check-email-card').style.display = which === 'check' ? 'block' : 'none';
+  document.getElementById('recovery-card').style.display = which === 'recovery' ? 'block' : 'none';
+  document.getElementById('auth-sub').textContent = which === 'recovery' ? 'اختر كلمة مرور جديدة لحسابك' : AUTH_SUB;
+}
+
+function toggleAuthMode() {
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  document.getElementById('auth-submit-btn').textContent = authMode === 'login' ? 'دخول' : 'إنشاء حساب';
+  document.getElementById('auth-pass').autocomplete = authMode === 'login' ? 'current-password' : 'new-password';
+  document.getElementById('auth-toggle').innerHTML = authMode === 'login'
+    ? 'ليس لديك حساب؟ <a onclick="toggleAuthMode()">أنشئ حساب</a>'
+    : 'لديك حساب؟ <a onclick="toggleAuthMode()">سجّل دخول</a>';
+  document.getElementById('forgot-pass-row').style.display = authMode === 'login' ? 'block' : 'none';
+  clearAuthMessages();
+}
+
+function clearAuthMessages() {
+  document.getElementById('auth-err').style.display = 'none';
+  document.getElementById('auth-ok').style.display = 'none';
+  document.getElementById('resend-row').style.display = 'none';
+}
+
+// Where the e-mail links (reset, confirmation) bring the person back to.
+function authRedirect() { return location.origin + location.pathname; }
+
+const AUTH_MSG = {
+  'invalid-credential': 'البريد أو كلمة المرور غلط',
+  'email-in-use': 'البريد مسجّل مسبقًا — جرب تسجّل دخول',
+  'weak-password': 'كلمة المرور لازم تكون 6 أحرف على الأقل',
+  'invalid-email': 'صيغة البريد غير صحيحة',
+  'email-not-confirmed': 'فعّل بريدك أولًا — افتح الرابط اللي وصلك على بريدك',
+  'rate-limited': 'محاولات كثيرة — انتظر شوي وجرّب مرة ثانية',
+  'offline': 'تعذّر الاتصال — تأكد من الإنترنت وجرّب مرة ثانية',
+  'timeout': 'الاتصال بطيء — جرّب مرة ثانية'
+};
+function authErrorText(e) { return AUTH_MSG[e && e.code] || ('خطأ: ' + (e && e.message)); }
+
+async function sendResetEmail() {
+  const email = document.getElementById('auth-email').value.trim();
+  clearAuthMessages();
+  if (!email) { showAuthError('اكتب بريدك الإلكتروني فوق الأول، وبعدين اضغط "نسيت كلمة المرور"'); return; }
+  try {
+    await Data.auth.resetPassword(email, authRedirect());
+    // The same answer whether or not the address has an account.
+    showAuthOk(['إذا كان البريد مسجّلًا وصلك رابط تغيير كلمة المرور.', 'تأكد من كتابة البريد صح، وتفقّد السبام.']);
+  } catch (e) {
+    showAuthError(authErrorText(e));
+  }
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-err');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function showAuthOk(lines) {
+  const el = document.getElementById('auth-ok');
+  el.innerHTML = lines.map(escapeHtml).join('<br>');
+  el.style.display = 'block';
+}
+
+async function submitAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass = document.getElementById('auth-pass').value;
+  clearAuthMessages();
+  if (!email || !pass) { showAuthError('عبّي البريد وكلمة المرور'); return; }
+
+  const btn = document.getElementById('auth-submit-btn');
+  if (btn.disabled) return;
+  const restore = setButtonBusy(btn, authMode === 'signup' ? 'جاري إنشاء الحساب...' : 'جاري الدخول...');
+  try {
+    if (authMode === 'signup') {
+      const res = await Data.auth.signUp(email, pass, authRedirect());
+      // Confirmation is on: no session yet, the person must open the e-mailed link first.
+      if (!res.confirmed) showCheckEmail(email);
+    } else {
+      await Data.auth.signInWithPassword(email, pass);
+    }
+  } catch (e) {
+    showAuthError(authErrorText(e));
+    if (e.code === 'email-not-confirmed') { pendingConfirmEmail = email; document.getElementById('resend-row').style.display = 'block'; }
+  } finally {
+    restore();
+  }
+}
+
+function showCheckEmail(email) {
+  pendingConfirmEmail = email;
+  document.getElementById('check-email-addr').textContent = email;
+  document.getElementById('check-email-err').style.display = 'none';
+  showAuthCard('check');
+}
+
+function backToLogin() {
+  authMode = 'signup';
+  toggleAuthMode();
+  showAuthCard('login');
+}
+
+async function resendConfirmation() {
+  const email = pendingConfirmEmail || document.getElementById('auth-email').value.trim();
+  if (!email) return;
+  const checking = document.getElementById('check-email-card').style.display !== 'none';
+  const errEl = document.getElementById('check-email-err');
+  errEl.style.display = 'none';
+  try {
+    await Data.auth.resend(email, authRedirect());
+    showToast('✅ أرسلنا الرابط مرة ثانية');
+  } catch (e) {
+    if (checking) { errEl.textContent = authErrorText(e); errEl.style.display = 'block'; } else showAuthError(authErrorText(e));
+  }
+}
+
+// The set-new-password screen: opened from the reset e-mail link (the session
+// is already open, see boot()). Same card as the sign-in form.
+function showRecovery(email) {
+  recovering = true;
+  resetAppState();
+  document.getElementById('recovery-email').textContent = email || '';
+  document.getElementById('recovery-account').style.display = email ? 'block' : 'none';
+  document.getElementById('app-view').style.display = 'none';
+  document.getElementById('auth-view').style.display = 'block';
+  document.getElementById('recovery-err').style.display = 'none';
+  document.getElementById('new-pass').value = '';
+  document.getElementById('new-pass2').value = '';
+  showAuthCard('recovery');
+}
+
+async function submitNewPassword() {
+  const p1 = document.getElementById('new-pass').value;
+  const p2 = document.getElementById('new-pass2').value;
+  const err = document.getElementById('recovery-err');
+  const fail = (m) => { err.textContent = m; err.style.display = 'block'; };
+  err.style.display = 'none';
+  if (!p1 || !p2) { fail('اكتب كلمة المرور مرتين'); return; }
+  if (p1.length < 6) { fail('كلمة المرور لازم تكون 6 أحرف على الأقل'); return; }
+  if (p1 !== p2) { fail('كلمتا المرور غير متطابقتين'); return; }
+  const btn = document.getElementById('recovery-submit-btn');
+  if (btn.disabled) return;
+  const restore = setButtonBusy(btn, 'جاري الحفظ...');
+  try {
+    await Data.auth.updatePassword(p1);
+  } catch (e) {
+    restore();
+    if (e.code === 'same-password') fail('اختر كلمة مرور مختلفة عن القديمة');
+    else if (e.code === 'no-session') fail('انتهت صلاحية الرابط — اطلب رابط جديد من "نسيت كلمة المرور؟"');
+    else fail(authErrorText(e));
+    return;
+  }
+  restore();
+  recovering = false;
+  showAuthCard('login');
+  showToast('✅ تم تغيير كلمة المرور');
+  let user = null;
+  try { user = await Data.auth.current(); } catch (e) {}
+  handleAuthUser(user).catch(showInitFailure);
+}
+
+function cancelRecovery() {
+  recovering = false;
+  clearCache();
+  showAuthCard('login');
+  Data.auth.signOut().catch(() => {});
+  handleAuthUser(null);
+}
+
+function doLogout() {
+  Data.auth.signOut().catch((e) => { showToast('تعذّر تسجيل الخروج — جرّب مرة ثانية'); });
+}
+
+// The kind of event picked in the create form (required — no default, so a
+// graduation isn't saved as a wedding by mistake). Until one is picked, the
+// name field's example cycles through the kinds, like the landing page's card.
+let newEventType = null;
+let namePlaceholderTimer = null;
+function pickEventType(t) {
+  newEventType = t;
+  document.querySelectorAll('#ev-type-picker .type-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.type === t);
+    b.setAttribute('aria-checked', b.dataset.type === t ? 'true' : 'false');
+  });
+  clearInterval(namePlaceholderTimer);
+  document.getElementById('ev-name').placeholder = 'اسم المناسبة (مثال: ' + EVENT_TYPES[t].example + ')';
+}
+function resetEventTypePicker() {
+  newEventType = null;
+  document.querySelectorAll('#ev-type-picker .type-btn').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-checked', 'false'); });
+  const examples = Object.values(EVENT_TYPES).map(k => k.example);
+  let i = 0;
+  const input = document.getElementById('ev-name');
+  input.placeholder = 'اسم المناسبة (مثال: ' + examples[0] + ')';
+  clearInterval(namePlaceholderTimer);
+  namePlaceholderTimer = setInterval(() => {
+    i = (i + 1) % examples.length;
+    input.placeholder = 'اسم المناسبة (مثال: ' + examples[i] + ')';
+  }, 2500);
+}
+
+function showCreateForm() {
+  const f = document.getElementById('create-form');
+  const opening = f.style.display !== 'block';
+  f.style.display = opening ? 'block' : 'none';
+  if (opening && !newEventType) resetEventTypePicker();
+  if (!opening) clearInterval(namePlaceholderTimer);
+}
+
+// Changed your mind: close the form and forget what was typed, so it opens
+// empty next time. Nothing is created.
+function cancelCreateForm() {
+  ['ev-name', 'ev-date', 'ev-venue', 'ev-maps'].forEach(id => { document.getElementById(id).value = ''; });
+  newEventType = null;
+  clearInterval(namePlaceholderTimer);
+  document.getElementById('create-form').style.display = 'none';
+}
+
+async function createNewEvent() {
+  const name = document.getElementById('ev-name').value.trim();
+  const date = document.getElementById('ev-date').value;
+  const venue = document.getElementById('ev-venue').value.trim();
+  const mapsLink = document.getElementById('ev-maps').value.trim();
+  if (!newEventType) { alert('اختر نوع المناسبة: زفاف أو تخرج أو فعالية'); return; }
+  if (!name) { alert('اكتب اسم المناسبة'); return; }
+  if (mapsLink && !/^https?:\/\//i.test(mapsLink)) { alert('رابط الموقع لازم يبدأ بـ http:// أو https://'); return; }
+  const type = newEventType;
+
+  const btn = document.getElementById('create-submit-btn');
+  if (btn.disabled) return;
+  const restore = setButtonBusy(btn, 'جاري الإنشاء...');
+
+  try {
+    // The server picks the id, enforces the one-event-per-customer limit
+    // atomically and creates the door code with the event.
+    const eventId = await Data.events.create({ name, type, date, venue, mapsLink, theme: EVENT_TYPES[type].theme });
+    if (!shownAdmin) {
+      notifyAdmin('مناسبة جديدة 🎉', 'عميل جديد سوى مناسبة: "' + name + '" — الإيميل: ' + (shownEmail || shownUid));
+    }
+    goTo('event.html?id=' + encodeURIComponent(eventId));
+    // Left busy on purpose: the page is on its way to the dashboard.
+  } catch (e) {
+    // After a timeout the event may exist already: look before saying anything.
+    if (e.code === 'timeout' || e.code === 'offline' || e.code === 'limit-reached') {
+      try { await refreshEvents(); } catch (x) {}
+      const made = allEvents.find(ev => ev.ownerUid === shownUid && ev.name === name && Date.now() - new Date(ev.createdAt).getTime() < 5 * 60 * 1000);
+      if (made) { goTo('event.html?id=' + encodeURIComponent(made.id)); return; }
+    }
+    restore();
+    if (e.code === 'limit-reached') {
+      alert('عندك مناسبة وحدة مفعّلة على حسابك حاليًا. اطلب مناسبة إضافية من لوحتك.');
+      refreshEvents().catch(() => {});
+    } else {
+      alert('صار خطأ: ' + (e.code || '') + ' — ' + e.message);
+      console.error(e);
+    }
+  }
+}
+
+// The two numbers come from the event doc itself (guestCount and
+// scannedCount, both kept by transactions in event.html and scan.html), so
+// listing events never reads a guest. An event with no scannedCount yet (no
+// guest has entered) shows 0 for attended.
+function statsBoxHtml(ev) {
+  const total = typeof ev.guestCount === 'number' ? ev.guestCount : 0;
+  const attended = typeof ev.scannedCount === 'number' ? ev.scannedCount : 0;
+  return statsHtml(total, attended);
+}
+
+// The two numbers plus an attendance bar (left out when attended is unknown).
+function statsHtml(total, attended) {
+  const known = typeof attended === 'number';
+  const pct = known && total > 0 ? Math.min(100, Math.round(attended * 100 / total)) : 0;
+  return `
+    <div class="event-stat"><div class="n">${total}</div><div class="l">كل الضيوف</div></div>
+    <div class="event-stat"><div class="n">${attended}</div><div class="l">حضروا</div></div>
+    ${known ? `<div class="att-bar"><div class="att-row"><span>نسبة الحضور</span><span class="att-pct">${pct}%</span></div><div class="att-track"><div class="att-fill" style="width:${pct}%"></div></div></div>` : ''}
+  `;
+}
+
+function renderEvents(events, showOwner) {
+  const list = document.getElementById('events-list');
+  if (events.length === 0) {
+    list.innerHTML = '<div class="empty">' + (ownerFilter ? 'هذا الحساب ما عنده مناسبات' : 'لسه ما أنشأت أي مناسبة') + '</div>';
+    return;
+  }
+  events.forEach(ev => { try { localStorage.setItem('ev_kind_' + ev.id, eventTypeOf(ev)); } catch (e) {} });
+  list.innerHTML = events.map(ev => `
+    <div class="card event-card">
+      <div class="event-card-top">
+        <div>
+          <div class="event-name">${escapeHtml(ev.name)} ${ev.paid ? '<span style="color:#4CAF50; font-size:11px;">✅ مفعّلة' + (typeof ev.guestLimit === 'number' ? ' (' + ev.guestLimit + ' ' + guestWord(ev.guestLimit) + ')' : '') + '</span>' : '<span style="color:#E5484D; font-size:11px;">🔒 غير مفعّلة</span>'}</div>
+          <div class="event-date event-meta">${ev.date ? `<span>${ic('calendar', 13)} ${formatEventDate(ev.date)}</span>` : ''}${ev.venue ? `<span>${ic('map-pin', 13)} ${escapeHtml(ev.venue)}</span>` : ''}</div>
+          ${showOwner ? `<div class="event-date">${ic('user', 12)} ${escapeHtml(ev.ownerEmail || ev.ownerUid || '')}</div>` : ''}
+        </div>
+      </div>
+      <div class="event-stats" id="stats-${ev.id}">${statsBoxHtml(ev)}</div>
+      <div class="event-actions">
+        ${showOwner && !ev.paid ? `<button class="btn small" style="margin:0; flex:1;" onclick="quickActivatePayment('${ev.id}')">${ic('check', 14)} تفعيل</button>` : ''}
+        <a class="btn ghost small" style="text-decoration:none; margin:0; flex:1; text-align:center;" href="event.html?id=${ev.id}">فتح</a>
+        <button class="btn ghost small" style="margin:0; border-color:rgba(255,120,120,0.4); color:#ff9d9d;" onclick="deleteEvent('${ev.id}', '${escapeForJsAttr(ev.name)}', '${ev.ownerUid}', '${escapeForJsAttr(ev.slug || '')}')" aria-label="حذف">${ic('trash-2', 15)}</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function deleteEvent(eventId, name, ownerUid, slug) {
+  const ev = allEvents.find(e => e.id === eventId);
+  const guestCount = ev ? ev.guestCount : undefined;
+  if (!(await confirmEventDelete({ name, guestCount }))) return;
+  try {
+    // One call deletes the event with its guests, requests and link, and gives the slot back.
+    await Data.events.remove(eventId);
+    await refreshEvents().catch(() => {});
+  } catch (e) {
+    alert('صار خطأ أثناء الحذف: ' + (e.code || '') + ' — ' + e.message);
+    console.error(e);
+  }
+}
+
+let pollers = [];
+let allAccounts = null; // loaded the first time the admin opens the section
+let myEventsCount = 0;
+let myEventLimit = 1;
+let myPendingRequestId = null;
+let shownUid = null;    // the account the page is showing
+let shownEmail = '';
+let shownAdmin = false;
+
+function showInitFailure(e) {
+  console.error(e);
+  tmErr(e && e.message || e);
+  const el = document.getElementById('auth-loading');
+  if (!el) return;
+  el.style.display = 'block';
+  el.textContent = 'تعذّر تشغيل الصفحة — اضغط هنا للتحديث';
+  el.style.cursor = 'pointer';
+  el.onclick = () => location.reload();
+}
+
+// The last list this browser saw, painted at once while the first answer is on
+// its way. Only for the same account; removed on sign-out.
+const CACHE_KEY = 'app_cache_v1';
+function readCache(uid) {
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    return c && c.uid === uid && Array.isArray(c.events) ? c : null;
+  } catch (e) { return null; }
+}
+function writeCache(uid, admin, events, acct) {
+  try { if (events.length <= 200) localStorage.setItem(CACHE_KEY, JSON.stringify({ uid, admin, events, acct })); } catch (e) {}
+}
+function clearCache() { try { localStorage.removeItem(CACHE_KEY); } catch (e) {} }
+
+function stopPollers() {
+  pollers.forEach(p => p.stop());
+  pollers = [];
+}
+
+function startPollers() {
+  stopPollers();
+  // Own actions refresh at once (refreshEvents / refreshAdmin); these keep it current.
+  pollers.push(Data.makePoller(refreshEvents, shownAdmin ? 30000 : 15000));
+  if (shownAdmin) pollers.push(Data.makePoller(refreshAdmin, 30000));
+  pollers.forEach(p => p.start());
+}
+
+let firstAuthMarked = false;
+let authSeq = 0;
+function watchAuth() {
+  try {
+    Data.auth.onChange((user) => {
+      try {
+        if (!firstAuthMarked) { firstAuthMarked = true; tmark('auth ' + (user ? 'user' : 'none')); }
+        if (recovering) return;
+        // Token refreshes and repeated events for the same account change nothing on screen.
+        if (user && !user.isAnonymous && user.uid === shownUid) return;
+        handleAuthUser(user);
+      } catch (e) { showInitFailure(e); }
+    });
+  } catch (e) { showInitFailure(e); }
+}
+
+// Forgets everything shown for the previous account (sign-out, or a recovery
+// link opened while another account is on screen).
+function resetAppState() {
+  authSeq++;
+  stopPollers();
+  clearCache();
+  document.getElementById('events-list').innerHTML = '';
+  ['admin-unpaid-section', 'admin-requests-section', 'admin-accounts-section', 'owner-filter-bar', 'limit-box'].forEach(id => { document.getElementById(id).style.display = 'none'; });
+  document.getElementById('admin-requests-list').innerHTML = '';
+  document.getElementById('admin-accounts-list').innerHTML = '';
+  document.getElementById('admin-accounts-body').style.display = 'none';
+  document.getElementById('create-form').style.display = 'none';
+  shownUid = null;
+  shownEmail = '';
+  shownAdmin = false;
+  allAccounts = null;
+  allEvents = [];
+  lastEventsJson = '';
+  lastReqJson = '';
+  ownerFilter = null;
+  knownCappedEventIds = null;
+  myEventsCount = 0;
+  myEventLimit = 1;
+  myPendingRequestId = null;
+  firstListMarked = false;
+}
+
+async function handleAuthUser(user) {
+  const seq = ++authSeq;
+  tmShow();
+  // An anonymous identity is what scan.html signs a door device in with;
+  // on the same browser it must not pass for "logged in" here — the
+  // login form stays up, and a real sign-in replaces it.
+  if (user && !user.isAnonymous) {
+    // The last list this browser saw for this account is shown at once (with the
+    // admin flag it had); the server's answer about the account follows.
+    const cached = readCache(user.uid);
+    let painted = false;
+    if (cached) {
+      painted = true;
+      document.getElementById('auth-loading').style.display = 'none';
+      document.getElementById('auth-view').style.display = 'none';
+      document.getElementById('app-view').style.display = 'block';
+      document.getElementById('current-email').textContent = user.email || '';
+      shownUid = user.uid;
+      shownEmail = user.email || '';
+      shownAdmin = cached.admin;
+      document.getElementById('events-heading').textContent = cached.admin ? 'كل المناسبات (أدمن)' : 'مناسباتي';
+      applyEvents(cached.events, cached.acct);
+    }
+    let admin;
+    try { admin = await Data.auth.isAdmin(); } catch (e) {
+      if (seq !== authSeq) return;
+      if (painted) setTimeout(() => { if (seq === authSeq) handleAuthUser(user); }, 5000);
+      else showInitFailure(e);
+      return;
+    }
+    if (seq !== authSeq) return;
+    if (painted && admin !== cached.admin) {
+      shownAdmin = admin;
+      lastEventsJson = '';
+      allEvents = [];
+      document.getElementById('events-list').innerHTML = '';
+    }
+    document.getElementById('auth-loading').style.display = 'none';
+    document.getElementById('auth-view').style.display = 'none';
+    document.getElementById('app-view').style.display = 'block';
+    document.getElementById('current-email').textContent = user.email || '';
+    shownUid = user.uid;
+    shownEmail = user.email || '';
+    shownAdmin = admin;
+    document.getElementById('events-heading').textContent = admin ? 'كل المناسبات (أدمن)' : 'مناسباتي';
+    startPollers();
+  } else {
+    document.getElementById('auth-loading').style.display = 'none';
+    document.getElementById('auth-view').style.display = 'block';
+    document.getElementById('app-view').style.display = 'none';
+    resetAppState();
+  }
+}
+
+const AUTO_APPROVE_CEILING = 3; // customers can self-serve up to this many events; beyond it needs admin approval
+
+function updateCreateGate(admin) {
+  const btn = document.getElementById('create-toggle-btn');
+  const box = document.getElementById('limit-box');
+  const reqBtn = document.getElementById('request-more-btn');
+  const pendingMsg = document.getElementById('pending-request-msg');
+  const msg = document.getElementById('limit-box-msg');
+  const locked = !admin && myEventsCount >= myEventLimit;
+  btn.style.display = locked ? 'none' : 'block';
+  box.style.display = locked ? 'block' : 'none';
+  if (locked) {
+    document.getElementById('create-form').style.display = 'none';
+    if (myPendingRequestId) {
+      reqBtn.style.display = 'none';
+      pendingMsg.style.display = 'block';
+    } else {
+      reqBtn.style.display = 'block';
+      pendingMsg.style.display = 'none';
+      if (myEventLimit < AUTO_APPROVE_CEILING) {
+        msg.textContent = 'وصلت لحد مناسباتك الحالي (' + myEventLimit + ').';
+        reqBtn.innerHTML = ic('plus', 16) + ' فتح مناسبة إضافية';
+        reqBtn.onclick = selfIncreaseLimit;
+      } else {
+        msg.textContent = 'وصلت للحد الأقصى المسموح ذاتيًا (' + AUTO_APPROVE_CEILING + '). لأي مناسبة زيادة لازم موافقة يدوية.';
+        reqBtn.innerHTML = ic('hand', 16) + ' اطلب مناسبة إضافية';
+        reqBtn.onclick = requestExtraEvent;
+      }
+    }
+  }
+}
+
+async function selfIncreaseLimit() {
+  try {
+    await Data.account.bumpLimit();
+    await refreshEvents().catch(() => {});
+  } catch (e) {
+    if (e.code === 'ceiling-reached') { requestExtraEvent(); return; }
+    alert('صار خطأ: ' + (e.code || '') + ' — ' + e.message);
+    console.error(e);
+  }
+}
+
+// null until the first list settles — lets checkNewlyCappedEvents skip
+// alerting for events that were ALREADY capped before the admin opened the
+// dashboard, and only toast for ones that cross the line while they're
+// actually watching.
+let knownCappedEventIds = null;
+let allEvents = [];
+let lastEventsJson = '';
+let evSeq = 0;
+let firstListMarked = false;
+
+// Paints a list (from the cache or the server). Skips the redraw when nothing changed.
+function applyEvents(events, acct) {
+  const json = JSON.stringify([events, acct]);
+  if (json === lastEventsJson) return;
+  lastEventsJson = json;
+  allEvents = events;
+  if (acct) { myEventLimit = acct.eventLimit; myPendingRequestId = acct.pendingRequest; }
+  myEventsCount = shownAdmin ? events.filter(ev => ev.ownerUid === shownUid).length : (acct ? acct.eventCount : events.length);
+  updateCreateGate(shownAdmin);
+  renderEvents(ownerFilter ? events.filter(ev => ev.ownerUid === ownerFilter.uid) : events, shownAdmin);
+  if (shownAdmin) {
+    renderAllAccounts();
+    renderUnpaidEvents(events);
+  }
+}
+
+// One read of the list (and, for a customer, the limit and the pending request).
+// Called by the poller and right after the person's own actions; an older answer
+// never overwrites a newer one.
+async function refreshEvents() {
+  const my = ++evSeq;
+  const uid = shownUid, admin = shownAdmin;
+  if (!uid) return;
+  let events, acct = null;
+  try {
+    [events, acct] = await Promise.all([Data.events.list(), admin ? null : Data.account.get()]);
+  } catch (e) {
+    if (!firstListMarked && uid === shownUid && !allEvents.length) {
+      const list = document.getElementById('events-list');
+      if (!list.children.length) list.innerHTML = '<div class="empty">⚠️ تعذّر تحميل المناسبات — جرّب التحديث</div>';
+    }
+    throw e;
+  }
+  if (my !== evSeq || uid !== shownUid) return;
+  if (!firstListMarked) { firstListMarked = true; tmark('events server n=' + events.length); }
+  const wasEmptyError = !allEvents.length && document.querySelector('#events-list .empty');
+  if (wasEmptyError) lastEventsJson = '';
+  applyEvents(events, acct);
+  writeCache(uid, admin, events, acct);
+  if (admin) checkNewlyCappedEvents(events);
+}
+
+// Live, in-page alert the moment ANY customer's event reaches its guest
+// limit (the free 5, or the number the admin set) while the admin happens to
+// have this dashboard open — on top of the email notification, for whenever
+// they're already looking at it.
+function checkNewlyCappedEvents(events) {
+  const capped = new Set(events.filter(ev => (ev.guestCount || 0) >= guestCapOf(ev)).map(ev => ev.id));
+  if (knownCappedEventIds) {
+    events.forEach(ev => {
+      if (capped.has(ev.id) && !knownCappedEventIds.has(ev.id)) {
+        showToast('🔔 مناسبة "' + ev.name + '" وصلت لحد الضيوف (' + guestCapOf(ev) + ') — بانتظار التواصل');
+      }
+    });
+  } else if (capped.size > 0) {
+    // First snapshot after opening the dashboard: don't name events that were
+    // already capped before now (that's what the standing unpaid list is
+    // for), but a fresh page load with pending, ready-to-pay events is worth
+    // one quiet nudge too — otherwise an admin who opens the dashboard AFTER
+    // the cap was hit gets no live signal at all, only the earlier email.
+    showToast('🔔 يوجد ' + capped.size + ' ' + arPlural(capped.size, 'مناسبة', 'مناسبتين', 'مناسبات') + ' وصلت لحد الضيوف — بانتظار التواصل');
+  }
+  knownCappedEventIds = capped;
+}
+
+// Used to render its own duplicate card per unpaid event — the same event
+// then showed up AGAIN in the full list below with the rest of its details
+// (date, venue, stats), just to add a "تفعيل" button. Now it's just a
+// counter/banner pointing at the single, unified card in the list below,
+// which carries the activate action itself (see renderEvents).
+function renderUnpaidEvents(events) {
+  const unpaid = events.filter(ev => !ev.paid);
+  const section = document.getElementById('admin-unpaid-section');
+  if (unpaid.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  document.getElementById('admin-unpaid-badge').textContent = unpaid.length > 99 ? '99+' : String(unpaid.length);
+}
+
+// Activating means typing the number of guests the customer is allowed
+// (agreed with them off-platform) — there is no activation without a number.
+async function quickActivatePayment(eventId) {
+  const ev = allEvents.find(e => e.id === eventId);
+  const n = askGuestLimit({ name: ev ? ev.name : '', current: null, activated: false, guestCount: ev ? (ev.guestCount || 0) : 0 });
+  if (n === null) return;
+  try {
+    await Data.admin.activateEvent(eventId, n);
+    await refreshEvents().catch(() => {});
+  } catch (e) {
+    alert('صار خطأ: ' + (e.code || '') + ' — ' + e.message);
+    console.error(e);
+  }
+}
+
+async function requestExtraEvent() {
+  if (myPendingRequestId) return;
+  try {
+    const r = await Data.account.requestExtraEvent();
+    if (r.created) notifyAdmin('طلب مناسبة إضافية 🙋', 'طلب من: ' + (shownEmail || shownUid));
+    myPendingRequestId = r.id;
+    updateCreateGate(false);
+    refreshEvents().catch(() => {});
+  } catch (e) {
+    alert('صار خطأ: ' + (e.code || '') + ' — ' + e.message);
+    console.error(e);
+  }
+}
+
+let lastReqJson = '';
+// Admin extras: the pending requests, the accounts badge, and the accounts list if it is open.
+async function refreshAdmin() {
+  const uid = shownUid;
+  const [reqs, count] = await Promise.all([Data.admin.requests(), Data.admin.accountsCount()]);
+  if (uid !== shownUid) return;
+  const json = JSON.stringify(reqs);
+  if (json !== lastReqJson) { lastReqJson = json; renderAdminRequests(reqs); }
+  if (allAccounts === null) setAccountsBadge(count);
+  else {
+    const list = await Data.admin.accounts();
+    if (uid !== shownUid) return;
+    allAccounts = list.map(a => ({ id: a.uid, email: a.email, createdAt: a.createdAt }));
+    setAccountsBadge(allAccounts.length);
+    renderAllAccounts();
+  }
+}
+
+function renderAdminRequests(reqs) {
+  const section = document.getElementById('admin-requests-section');
+  const list = document.getElementById('admin-requests-list');
+  if (reqs.length === 0) { section.style.display = 'none'; list.innerHTML = ''; return; }
+  section.style.display = 'block';
+  document.getElementById('admin-requests-badge').textContent = reqs.length > 99 ? '99+' : String(reqs.length);
+  list.innerHTML = reqs.map(r => `
+    <div class="card event-card-top">
+      <div>
+        <div class="event-name">${escapeHtml(r.email || r.uid)}</div>
+        <div class="event-date">طلب مناسبة إضافية</div>
+      </div>
+      <div class="event-actions">
+        <button class="btn small" style="margin:0; width:auto; padding:8px 14px;" onclick="approveEventRequest('${r.id}','${r.uid}')">${ic('check', 14)} قبول</button>
+        <button class="btn ghost small" style="margin:0; width:auto; padding:8px 14px;" onclick="rejectEventRequest('${r.id}')">${ic('x', 14)} رفض</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function setAccountsBadge(n) {
+  document.getElementById('admin-accounts-section').style.display = n > 0 ? 'block' : 'none';
+  document.getElementById('admin-accounts-badge').textContent = n > 99 ? '99+' : String(n);
+}
+
+// What each account has done, from the events this page already reads (no
+// extra reads): how many events, and whether any is activated.
+let accountsFilter = 'all';
+function accountStatus(uid) {
+  const evs = allEvents.filter(ev => ev.ownerUid === uid);
+  const paid = evs.filter(ev => ev.paid);
+  if (evs.length === 0) return { kind: 'none', tags: '<span class="acc-tag none">بدون مناسبة</span>' };
+  let tags = '<span class="acc-tag">' + evs.length + ' ' + (evs.length === 1 ? 'مناسبة' : 'مناسبات') + '</span>';
+  if (paid.length) {
+    const limits = paid.map(ev => ev.guestLimit).filter(n => typeof n === 'number');
+    tags += '<span class="acc-tag paid">✓ مفعّلة' + (limits.length ? ' (' + limits.reduce((x, y) => x + y, 0) + ' ' + guestWord(limits.reduce((x, y) => x + y, 0)) + ')' : '') + '</span>';
+    return { kind: 'paid', tags };
+  }
+  return { kind: 'trial', tags: tags + '<span class="acc-tag trial">يجرّب مجانًا</span>' };
+}
+function setAccountsFilter(f) {
+  accountsFilter = f;
+  document.querySelectorAll('#admin-accounts-filters .acc-filter').forEach(b => b.classList.toggle('on', b.dataset.f === f));
+  renderAllAccounts();
+}
+
+// Tapping an account shows only that customer's events in the list below.
+let ownerFilter = null;
+function setOwnerFilter(uid, email) {
+  ownerFilter = uid ? { uid, email } : null;
+  const bar = document.getElementById('owner-filter-bar');
+  bar.style.display = ownerFilter ? 'flex' : 'none';
+  if (ownerFilter) document.getElementById('owner-filter-email').textContent = email;
+  renderEvents(ownerFilter ? allEvents.filter(ev => ev.ownerUid === uid) : allEvents, true);
+  if (ownerFilter) bar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function toggleAllAccounts() {
+  const body = document.getElementById('admin-accounts-body');
+  const open = body.style.display !== 'block';
+  body.style.display = open ? 'block' : 'none';
+  document.getElementById('admin-accounts-arrow').textContent = open ? '▴' : '▾';
+  if (!open || allAccounts) return;
+  const list = document.getElementById('admin-accounts-list');
+  list.innerHTML = '<div class="sub" style="text-align:center;">⏳ جاري التحميل...</div>';
+  try {
+    const accounts = await Data.admin.accounts();
+    allAccounts = accounts.map(a => ({ id: a.uid, email: a.email, createdAt: a.createdAt }));
+    setAccountsBadge(allAccounts.length);
+    renderAllAccounts();
+  } catch (e) {
+    console.error('accounts load failed:', e);
+    list.innerHTML = '<div class="sub" style="text-align:center;">⚠️ تعذّر التحميل — اقفل القسم وافتحه مرة ثانية</div>';
+  }
+}
+
+function renderAllAccounts() {
+  if (!allAccounts) return;
+  const list = document.getElementById('admin-accounts-list');
+  const q = document.getElementById('admin-accounts-search').value.trim().toLowerCase();
+  const accounts = allAccounts
+    .filter(a => !q || (a.email || a.id).toLowerCase().includes(q))
+    .filter(a => accountsFilter === 'all' || accountStatus(a.id).kind === accountsFilter);
+  if (accounts.length === 0) {
+    list.innerHTML = '<div class="sub" style="text-align:center;">' + (q ? 'لا يوجد حساب بهذا الإيميل' : 'لا يوجد حسابات') + '</div>';
+    return;
+  }
+  list.innerHTML = accounts.map(a => {
+    const dt = a.createdAt ? new Date(a.createdAt) : null;
+    // Built by hand (12-hour, ص/م, Western digits) — toLocaleString('ar-SA') can give Arabic-Indic digits or Hijri dates.
+    const h = dt ? dt.getHours() : 0;
+    const time = dt ? ((h % 12 || 12) + ':' + String(dt.getMinutes()).padStart(2, '0') + ' ' + (h < 12 ? 'ص' : 'م')) : '';
+    const when = dt ? (dt.getDate() + ' ' + AR_MONTHS[dt.getMonth()] + ' ' + dt.getFullYear() + ' · ' + time) : '…';
+    const st = accountStatus(a.id);
+    return `
+    <div class="card event-card-top acc-row" onclick="setOwnerFilter('${escapeForJsAttr(a.id)}', '${escapeForJsAttr(a.email || a.id)}')">
+      <div>
+        <div class="event-name">${escapeHtml(a.email || a.id)}</div>
+        <div class="event-date">سجّل: ${when}</div>
+        <div class="acc-tags">${st.tags}</div>
+      </div>
+      <button class="btn ghost small acc-del-btn" style="margin:0; border-color:rgba(255,120,120,0.4); color:#ff9d9d;" onclick="event.stopPropagation(); deleteAccountRecord('${escapeForJsAttr(a.id)}', '${escapeForJsAttr(a.email || a.id)}')" aria-label="حذف">${ic('trash-2', 15)}</button>
+    </div>
+  `;
+  }).join('');
+}
+
+// Removes the record from this list only — the row the signup mirror wrote.
+// The customer's real sign-in and their events and guests live elsewhere and
+// are untouched.
+async function deleteAccountRecord(uid, email) {
+  if (!confirm('حذف "' + email + '" من القائمة؟\n\nيحذف من القائمة فقط — حساب العميل ومناسباته ما تتأثر، ويقدر يدخل عادي. بس ما راح يرجع يظهر هنا.')) return;
+  try {
+    await Data.admin.removeAccountRecord(uid);
+    allAccounts = allAccounts.filter(a => a.id !== uid);
+    setAccountsBadge(allAccounts.length);
+    renderAllAccounts();
+    showToast('✅ انحذف من القائمة');
+  } catch (e) {
+    alert('صار خطأ أثناء الحذف: ' + (e.code || '') + ' — ' + e.message);
+    console.error(e);
+  }
+}
+
+async function approveEventRequest(requestId, uid) {
+  try {
+    await Data.admin.approveRequest(requestId);
+  } catch (e) {
+    if (e.code !== 'already-handled') { alert('صار خطأ: ' + (e.code || '') + ' — ' + e.message); console.error(e); }
+  }
+  refreshAdmin().catch(() => {});
+}
+
+async function rejectEventRequest(requestId) {
+  try {
+    await Data.admin.rejectRequest(requestId);
+  } catch (e) {
+    if (e.code !== 'already-handled') { alert('صار خطأ: ' + (e.code || '') + ' — ' + e.message); console.error(e); }
+  }
+  refreshAdmin().catch(() => {});
+}
+
+async function boot() {
+  let rec = null;
+  try { rec = await Data.auth.recoveryFromUrl(); } catch (e) { rec = null; }
+  if (rec && rec.error) {
+    document.getElementById('auth-loading').style.display = 'none';
+    showAuthError(rec.error === 'offline' ? 'تعذّر الاتصال — افتح الرابط مرة ثانية' : 'الرابط منتهي أو مستخدم من قبل — اطلب رابط جديد من "نسيت كلمة المرور؟"');
+  } else if (rec && rec.kind === 'recovery') {
+    document.getElementById('auth-loading').style.display = 'none';
+    tmark('recovery');
+    showRecovery(rec.user && rec.user.email);
+  } else if (rec && rec.kind === 'signup') {
+    showToast('✅ تم تفعيل بريدك');
+  }
+  watchAuth();
+}
+
+try {
+  tmark('supabase');
+  boot().catch(showInitFailure);
+} catch (e) { showInitFailure(e); }
+
+// Last safety net for "stuck on جاري التحميل..." with no way out (a real
+// report: an iPhone sat on it for about a minute and a half after creating
+// an event, though the event itself had saved fine). Whatever step is slow
+// — sign-in, the first database read — the message first admits the slow
+// connection (SLOW_LOADING_MS), and only after STUCK_LOADING_MS turns into
+// a tap-to-retry instead of hanging silently.
+const SLOW_LOADING_MS = 8000;
+const STUCK_LOADING_MS = 25000;
+setTimeout(() => {
+  const el = document.getElementById('auth-loading');
+  if (!el || el.style.display === 'none' || el.onclick || el.textContent.trim() !== 'جاري التحميل...') return;
+  el.textContent = 'الاتصال بطيء، لحظات…';
+  tmark('slow');
+  tmProbes();
+}, SLOW_LOADING_MS);
+setTimeout(() => {
+  const el = document.getElementById('auth-loading');
+  // Only the plain/slow loading text: an error or "invalid link" message
+  // already shown there is the real answer, not a hang.
+  if (!el || el.style.display === 'none' || el.onclick) return;
+  const t = el.textContent.trim();
+  if (t !== 'جاري التحميل...' && t !== 'الاتصال بطيء، لحظات…') return;
+  TM.show = true;
+  TM.stuck = true;
+  tmark('stuck');
+  el.textContent = '⚠️ التحميل تأخر — اضغط هنا للمحاولة مرة ثانية';
+  el.style.cursor = 'pointer';
+  el.onclick = () => location.reload();
+}, STUCK_LOADING_MS);
+</script>
+</body>
+</html>

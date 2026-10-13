@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Refuses to run inside another site's frame (clickjacking: a page that
+     overlays this one could trick a tap onto "delete" or "check in").
+     GitHub Pages can't send X-Frame-Options / CSP frame-ancestors headers,
+     and browsers ignore frame-ancestors in a <meta> tag, so this is the
+     page-level equivalent: hide everything, then try to break out. -->
+<script>if (window.top !== window.self) { document.documentElement.style.display = 'none'; try { window.top.location = window.self.location.href; } catch (e) {} }</script>
+<!-- If one of this page's own script files fails to download (a weak phone
+     signal), the page would open half-working with no message — a dashboard
+     with no invite link, a login button that does nothing. Offer a reload. -->
+<script>window.addEventListener('error', function (e) {
+  var t = e.target;
+  if (!t || t.tagName !== 'SCRIPT' || !t.src || t.src.indexOf(location.origin + '/') !== 0) return;
+  function show() {
+    if (document.getElementById('load-fail')) return;
+    var d = document.createElement('div');
+    d.id = 'load-fail'; d.setAttribute('role', 'alert');
+    d.textContent = '⚠️ ما اكتمل تحميل الصفحة بسبب ضعف الإنترنت — اضغط هنا لإعادة التحميل';
+    d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:100000;background:#b3261e;color:#fff;padding:14px 16px;text-align:center;font:600 15px/1.6 sans-serif;cursor:pointer;';
+    d.onclick = function () { location.reload(); };
+    document.body.appendChild(d);
+  }
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show);
+}, true);</script>
+<title>سكانر الدخول</title>
+
+<!-- Deliberately no <link rel="manifest"> here. iOS's "Add to Home Screen"
+     was found (confirmed live, on a real device) to prefer a Web App
+     Manifest's start_url over the current address-bar URL, even when that
+     manifest is swapped in dynamically per event — the manifest link is
+     locked in too early. Without one, iOS falls back to using the page's
+     OWN current URL for the saved icon, which is exactly what we want since
+     scan.html?event=... is already the right target. The
+     apple-mobile-web-app-* meta tags below are enough on their own for
+     full-screen "app" mode; manifest.webmanifest still exists on disk but
+     nothing references it. -->
+<meta name="theme-color" content="#0A0A0A">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="سكانر">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="preconnect" href="https://gunizkapwatixvbfliva.supabase.co" crossorigin>
+<style>
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-400-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-500-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-700-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Playfair Display';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/playfair-display-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Reem Kufi';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/reem-kufi-700-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'Reem Kufi';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/reem-kufi-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+  * { margin:0; padding:0; box-sizing:border-box; }
+  /* The event's colour theme, followed by the accents only. The page stays
+     dark whatever the theme (ivory included): this is the screen door staff
+     hold in a dim hall, and a white one would dazzle. The green/red result
+     colours never change. Same accent values as event.html's palettes. */
+  :root { --gold:#E0BC7A; --gold-deep:#C99B4A; --accent-rgb:224,188,122; --bg-base:#0A0A0A; }
+  [data-theme="rose"] { --gold:#E8B4B8; --gold-deep:#C9879A; --accent-rgb:232,180,184; --bg-base:#14090C; }
+  [data-theme="emerald"] { --gold:#D4AF7F; --gold-deep:#B08D57; --accent-rgb:212,175,127; --bg-base:#07120E; }
+  [data-theme="sapphire"] { --gold:#B8C6E0; --gold-deep:#8A9DC9; --accent-rgb:184,198,224; --bg-base:#080C16; }
+  body { font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg-base); color:#FAF8F4; min-height:100vh; }
+  .wrap { max-width:420px; margin:0 auto; padding:24px 18px 60px; }
+  /* Installed with no browser chrome (Add to Home Screen) — no address bar,
+     no pull-to-refresh to rely on. This is the one way to force a reload
+     without leaving the app, so it's pinned in place and visible on every
+     screen (loading, code entry, scanner), not tucked inside a menu. */
+  #refresh-btn { position:fixed; top:14px; left:14px; z-index:20; width:38px; height:38px; border-radius:50%;
+    background:rgba(255,255,255,0.06); border:1px solid rgba(var(--accent-rgb,224,188,122),0.25); color:var(--gold,#E0BC7A);
+    font-size:17px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .msg { text-align:center; padding:60px 20px; color:#B8B4AC; }
+  /* Side padding keeps a long event name clear of the pinned refresh button
+     (top-left) on a narrow phone; equal on both sides so it stays centred. */
+  h1 { font-family:'Playfair Display',serif; color:var(--gold); font-size:20px; text-align:center; margin-bottom:4px; padding:0 36px; overflow-wrap:anywhere; }
+  .sub { color:#B8B4AC; font-size:12px; text-align:center; margin-bottom:22px; }
+  .card { background:rgba(255,255,255,0.04); border:1px solid rgba(var(--accent-rgb),0.2); border-radius:14px; padding:20px; text-align:center; }
+  input { width:100%; padding:14px; margin-bottom:12px; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(var(--accent-rgb),0.25); color:#FAF8F4; font-size:20px; font-family:inherit; text-align:center; letter-spacing:6px; }
+  /* The default input above is tuned for the door code (big, spaced-out
+     digits) — wrong shape entirely for an email/password field. */
+  input.text-input { font-size:15px; letter-spacing:normal; text-align:right; }
+  .btn { width:100%; padding:13px; border:none; border-radius:10px; background:linear-gradient(135deg,var(--gold-deep),var(--gold)); color:#1a1400; font-weight:700; font-size:15px; cursor:pointer; }
+  .btn.ghost { width:100%; background:transparent; border:1px solid rgba(var(--accent-rgb),0.3); color:var(--gold); }
+  .toggle-row { text-align:center; font-size:13px; color:#B8B4AC; margin-top:14px; }
+  .toggle-row a { color:var(--gold); cursor:pointer; text-decoration:underline; }
+  .ol-row { display:flex; align-items:center; gap:8px; padding:10px 4px; border-bottom:1px solid rgba(var(--accent-rgb),0.15); }
+  .ol-name { flex:1; min-width:0; overflow-wrap:anywhere; }
+  .ol-tag { flex:none; font-size:11px; color:#8a857a; letter-spacing:1px; direction:ltr; }
+  .ol-state { flex:none; width:92px; text-align:center; font-size:12px; color:#8a857a; }
+  .ol-state.ol-in { color:#4CAF50; }
+  .ol-btn { flex:none; width:92px; padding:8px 4px; border-radius:8px; background:transparent; border:1px solid rgba(var(--accent-rgb),0.3); color:var(--gold); font-family:inherit; font-size:13px; cursor:pointer; }
+  .ol-btn:disabled { opacity:0.6; cursor:default; }
+  .ol-confirm { display:block; padding:14px 8px; background:rgba(var(--accent-rgb),0.08); border-radius:10px; }
+  .ol-cname { font-size:20px; font-weight:700; color:#FAF8F4; overflow-wrap:anywhere; }
+  .ol-ccode { font-size:13px; color:#B8B4AC; margin:6px 0 12px; }
+  .ol-cbtns { display:flex; gap:8px; }
+  .ol-cbtns .btn, .ol-cbtns .btn.ghost { flex:1; min-width:0; width:auto; padding:12px 6px; }
+  .ol-stale { color:#E0A030; }
+  .ol-note { text-align:center; color:#8a857a; font-size:12px; padding:12px 0; }
+  .counter { text-align:center; color:var(--gold); font-size:15px; font-weight:700; margin-bottom:14px; }
+  .manual-divider { display:flex; align-items:center; gap:10px; color:#6f6a62; font-size:12px; margin:16px 0 12px; }
+  .manual-divider::before, .manual-divider::after { content:''; flex:1; height:1px; background:rgba(var(--accent-rgb),0.2); }
+  .manual-row { display:flex; gap:8px; align-items:stretch; }
+  .manual-row input { flex:1; }
+  .err { color:#ff9d9d; font-size:13px; margin-bottom:10px; display:none; text-wrap:balance; }
+  .camera-status { font-size:13px; color:#B8B4AC; margin-bottom:14px; text-align:center; }
+  #camera-wrapper { position:relative; width:100%; max-width:320px; margin:0 auto; border-radius:16px; overflow:hidden; border:2px solid var(--gold); background:#000; }
+  #camera-wrapper::before { content:''; display:block; padding-top:100%; }
+  #camera-video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; display:block; }
+  .scan-overlay { position:absolute; top:0; right:0; bottom:0; left:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+  .scan-frame { width:65%; height:65%; border:2px solid var(--gold); border-radius:12px; box-shadow:0 0 0 9999px rgba(0,0,0,0.45); }
+  .scan-line { position:absolute; width:65%; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); animation:scanLine 2s linear infinite; }
+  @keyframes scanLine { 0% { top:17.5%; } 100% { top:82.5%; } }
+  /* Full-screen scan result. Tweak the look here: colours per state, icon
+     and name sizes. Durations are RESULT_UI in the script. */
+  #result-overlay { --res-ok:#1b5e20; --res-dup:#b71c1c; --res-denied:#bf360c; --res-error:#5d4037; --res-icon:120px; --res-icon-glyph:72px; --res-name:32px; --res-status:20px; --res-hint:14px;
+    position:fixed; top:0; right:0; bottom:0; left:0; z-index:100001; display:none; flex-direction:column; align-items:center; justify-content:center; padding:24px 16px; text-align:center; color:#fff; cursor:pointer; overflow:hidden; -webkit-tap-highlight-color:transparent; }
+  #result-overlay.rs-allowed { background:var(--res-ok); }
+  #result-overlay.rs-duplicate { background:var(--res-dup); }
+  #result-overlay.rs-denied { background:var(--res-denied); }
+  #result-overlay.rs-error { background:var(--res-error); }
+  #result-icon { width:var(--res-icon); height:var(--res-icon); border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; margin-bottom:20px; flex-shrink:0; }
+  #result-icon svg { width:var(--res-icon-glyph); height:var(--res-icon-glyph); stroke-width:2.5; }
+  /* A VIP guest (marked on the dashboard) gets a clear flag at the door. */
+  .vip-flag { display:inline-block; margin:0 auto 12px; padding:5px 18px; border-radius:99px; font-weight:700; font-size:18px; letter-spacing:1px; color:#1a1400; background:linear-gradient(135deg,var(--gold-deep),var(--gold)); }
+  #result-name { max-width:100%; font-size:var(--res-name); font-weight:700; line-height:1.3; margin-bottom:12px; overflow-wrap:anywhere; }
+  #result-status { font-size:var(--res-status); font-weight:500; line-height:1.5; overflow-wrap:anywhere; }
+  #result-since { font-size:16px; font-weight:400; line-height:1.5; margin-top:6px; color:rgba(255,255,255,0.9); }
+  #result-hint { font-size:var(--res-hint); margin-top:28px; color:rgba(255,255,255,0.9); }
+  @media (prefers-reduced-motion:no-preference) {
+    #result-overlay.rs-show { animation:resultPop 0.18s ease-out; }
+    @keyframes resultPop { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
+  }
+  #connection-banner { display:none; position:sticky; top:0; z-index:1000; background:#5a1a1a; color:#ffd7d7; text-align:center; padding:10px 16px; font-size:13px; font-weight:600; }
+
+  #splash { position:fixed; top:0; right:0; bottom:0; left:0; z-index:9999; display:flex; align-items:center; justify-content:center; transition:opacity 0.3s ease, visibility 0.3s ease; overflow:hidden; background:radial-gradient(ellipse at center, #14120e 0%, #0A0A0A 70%); }
+  #splash::before { content:''; position:absolute; width:460px; height:460px; border-radius:50%; background:radial-gradient(circle, rgba(224,188,122,0.12), transparent 70%); animation:splashPulse 3.5s ease-in-out infinite; }
+  #splash.hide { opacity:0; visibility:hidden; }
+  .splash-inner { text-align:center; position:relative; z-index:1; animation:splashFade 1.2s cubic-bezier(0.2,0.8,0.2,1); }
+  .splash-rings { animation:splashRingsIn 1.4s cubic-bezier(0.2,0.8,0.2,1), splashFloat 3.5s ease-in-out 1.4s infinite; margin-bottom:26px; filter:drop-shadow(0 6px 26px rgba(224,188,122,0.45)); }
+  .splash-title { font-family:'Reem Kufi','Playfair Display',sans-serif; font-size:42px; font-weight:700; color:#E0BC7A; letter-spacing:1px; margin-bottom:8px; text-shadow:0 2px 24px rgba(224,188,122,0.3); }
+  .splash-subtitle { font-family:'Playfair Display',serif; font-size:16px; font-weight:400; color:#E0BC7A; letter-spacing:6px; text-transform:uppercase; opacity:0.75; margin-bottom:4px; }
+  .splash-line { width:0; height:2px; background:linear-gradient(90deg,transparent,#E0BC7A,transparent); margin:20px auto 0; animation:splashLineGrow 1.6s ease-out 0.6s forwards; }
+  @keyframes splashFade { from { opacity:0; transform:translateY(20px) scale(0.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+  @keyframes splashRingsIn { from { opacity:0; transform:scale(0.7) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  @keyframes splashFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-6px); } }
+  @keyframes splashLineGrow { from { width:0; } to { width:140px; } }
+  @keyframes splashPulse { 0%,100% { transform:scale(0.9); opacity:0.5; } 50% { transform:scale(1.1); opacity:1; } }
+  svg.ic { flex-shrink:0; vertical-align:middle; }
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="splash-inner">
+    <div class="splash-rings"><img src="icons/logo.svg" alt="" width="104" height="104" style="display:block; margin:0 auto;"></div>
+    <div class="splash-title">دعوات</div>
+    <div class="splash-subtitle">Digital Invitations</div>
+    <div class="splash-line"></div>
+  </div>
+</div>
+<script>
+// Isolated on purpose — hides after load + 800 ms, but a 2000 ms cap
+// runs regardless of load. If this lived inside
+// the big application script below and something earlier in that script
+// threw (a slow/failed CDN script, a bug, a bad connection at the venue),
+// the splash would never get hidden and would block the real page
+// forever. This tiny script does only the splash, so nothing else on
+// the page can prevent it from running.
+(function () {
+  const t0 = Date.now();
+  let hidden = false;
+  function hideSplash() {
+    if (hidden) return;
+    hidden = true;
+    const splash = document.getElementById('splash');
+    if (!splash) return;
+    splash.classList.add('hide');
+    setTimeout(() => { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 400);
+  }
+  function whenReady() {
+    setTimeout(hideSplash, Math.max(0, 800 - (Date.now() - t0)));
+  }
+  if (document.readyState === 'complete') whenReady();
+  else window.addEventListener('load', whenReady);
+  // unconditional cap: never depends on load or on the app script
+  setTimeout(hideSplash, 2000);
+})();
+</script>
+
+<div id="connection-banner">⚠️ انقطع الاتصال بقاعدة البيانات — القائمة قد لا تكون محدّثة. تحقق من الإنترنت.</div>
+<button id="refresh-btn" onclick="location.reload()" title="تحديث الصفحة" aria-label="تحديث الصفحة"><i data-ic="refresh-cw" data-size="18"></i></button>
+<div class="wrap">
+  <div id="loading-msg" class="msg">جاري التحميل...</div>
+
+  <div id="pin-gate" style="display:none">
+    <h1 id="pin-event-name"></h1>
+    <div class="sub">أدخل رقم الدخول اللي وصلك من المنظّم</div>
+    <div class="card">
+      <div class="err" id="pin-err">رقم غير صحيح</div>
+      <input type="tel" inputmode="numeric" maxlength="6" id="pin-input" placeholder="000000" onkeydown="if(event.key==='Enter') checkPin()">
+      <button class="btn" onclick="checkPin(event)">دخول</button>
+    </div>
+
+    <!-- For an admin checking in on a device they don't normally use (a
+         security company's own phone, say) — a real sign-in with their
+         actual account, not a shared code, so nothing worth leaking ever
+         sits in this page's public source. -->
+    <div class="toggle-row" id="admin-login-toggle"><a onclick="showAdminLogin()"><i data-ic="key-round" data-size="14"></i> تسجيل دخول كأدمن</a></div>
+    <div class="card" id="admin-login-card" style="display:none; margin-top:12px;">
+      <div class="err" id="admin-login-err"></div>
+      <input type="email" class="text-input" id="admin-email" placeholder="البريد الإلكتروني" onkeydown="if(event.key==='Enter') document.getElementById('admin-pass').focus()">
+      <input type="password" class="text-input" id="admin-pass" placeholder="كلمة المرور" onkeydown="if(event.key==='Enter') submitAdminLogin()">
+      <button class="btn" onclick="submitAdminLogin()">دخول</button>
+      <div class="toggle-row"><a onclick="hideAdminLogin()">رجوع لكود الدخول</a></div>
+    </div>
+  </div>
+
+  <div id="scanner-view" style="display:none">
+    <h1 id="scan-event-name"></h1>
+    <div class="sub">سكانر الدخول</div>
+    <div class="counter" id="scan-counter">تم الدخول: 0 من 0</div>
+    <div class="card" style="text-align:center">
+      <p class="camera-status" id="camera-status">اضغط لتشغيل الكاميرا</p>
+      <button class="btn" id="start-cam-btn" onclick="startCamera()" style="width:100%"><i data-ic="camera" data-size="18"></i> تشغيل الكاميرا</button>
+
+      <div id="camera-wrapper" style="display:none">
+        <video id="camera-video" autoplay playsinline muted></video>
+        <div class="scan-overlay">
+          <div class="scan-frame"></div>
+          <div class="scan-line"></div>
+        </div>
+      </div>
+
+      <div class="manual-divider"><span>أو أدخل الكود يدويًا</span></div>
+      <div class="manual-row">
+        <button class="btn" style="width:auto; padding:12px 18px;" onclick="submitManualCode()">تحقق ✓</button>
+        <input type="text" id="manual-code" placeholder="مثال: WD-ABC123" style="margin-bottom:0; text-align:center; letter-spacing:2px; font-size:14px;" onkeydown="if(event.key==='Enter') submitManualCode()">
+      </div>
+    </div>
+
+    <button class="btn ghost" id="new-scan-btn" style="margin-top:14px; display:none" onclick="resetScanState()"><i data-ic="refresh-cw" data-size="16"></i> مسح جديد</button>
+
+    <!-- Live check-in needs a connection (it's a transactional write, so
+         it can't be trusted to work correctly offline), but staff still
+         need SOME way to help a guest at the door when the connection
+         drops — reading off a name list doesn't need to be perfect, it
+         just needs to exist. This shows the last successfully-synced
+         copy, cached locally, entirely independent of the network. -->
+    <button class="btn ghost" id="offline-list-btn" style="margin-top:10px; display:none" onclick="toggleOfflineList()"><i data-ic="list" data-size="16"></i> عرض الأسماء</button>
+    <div id="offline-list-section" style="display:none; margin-top:14px; text-align:right;">
+      <div class="sub" id="offline-list-meta"></div>
+      <button class="btn ghost" id="offline-refresh-btn" style="margin-top:4px; padding:8px; font-size:13px;" onclick="refreshOfflineList()"><i data-ic="refresh-cw" data-size="14"></i> تحديث القائمة</button>
+      <input type="text" id="offline-search" class="text-input" placeholder="ابحث بالاسم أو الكود — لإظهار من دخل" style="margin-top:8px;">
+      <div id="offline-list-results" style="max-height:320px; overflow-y:auto; margin-top:8px;"></div>
+    </div>
+
+    <!-- Once a device enters the PIN it stays unlocked indefinitely — there
+         was no way to hand a personal phone back "locked" at the end of a
+         shift. This lets whoever is holding the device end their own
+         session; it's not shown for an admin, since their access comes
+         back automatically from their own account either way. -->
+    <button class="btn ghost" id="lock-device-btn" style="margin-top:16px; display:none; opacity:0.7; font-size:12px;" onclick="lockOrClose()"><i data-ic="log-out" data-size="14"></i> تسجيل خروج من هذا الجهاز</button>
+  </div>
+</div>
+
+<div id="result-overlay" role="alert" aria-live="assertive" style="display:none" onclick="onResultTap()">
+  <div id="result-icon"></div>
+  <div class="vip-flag" id="result-vip" style="display:none;">★ VIP</div>
+  <div id="result-name"></div>
+  <div id="result-status"></div>
+  <div id="result-since" style="display:none"></div>
+  <div id="result-hint">المس الشاشة لإغلاقها</div>
+</div>
+
+<!-- Moved out of <head> so it doesn't block first paint (and the splash
+     screen) on a fetch to another CDN — nothing needs it until the script
+     below runs. -->
+<script src="supabase-config.js"></script>
+<script src="vendor/supabase.min.js"></script>
+<script src="data.js"></script>
+<script src="vendor/qr-scanner.umd.min.js"></script>
+<script src="icons.js"></script>
+<script src="utils.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const eventId = params.get('event');
+
+let eventData = null;
+
+// Ivory is the light theme on the invitation and dashboard; here it keeps the
+// default dark gold look (see the note on the theme variables above).
+const SCAN_THEMES = ['rose', 'emerald', 'sapphire'];
+function applyEventTheme(name) {
+  if (SCAN_THEMES.includes(name)) document.body.setAttribute('data-theme', name);
+  else document.body.removeAttribute('data-theme');
+}
+let guests = [];
+let scanWatch = null;
+let curUser = null;
+let qrScanner = null;
+let lastScanned = null;
+let scanCooldown = false;
+let audioCtx = null;
+
+// The signed-in user of this browser (null = nobody), kept current by
+// Data.auth.onChange. An admin or organizer who is already signed in on this
+// device (their session persists across all pages, same origin) shouldn't have
+// to ask the customer for the door code: the server answers the door calls
+// for them, so opening the scanner is just trying one.
+
+// Scan result look and timing in one place (colours and sizes are the
+// --res-* variables on #result-overlay in the CSS). autoMs 0 = stays until tapped.
+const RESULT_UI = {
+  tapGuardMs: 400,        // taps this soon after the overlay appears are ignored
+  clearLastMs: 600,       // lastScanned is cleared this long AFTER hiding
+  allowed:   { autoMs: 5000, icon: 'check',  cls: 'rs-allowed',   status: 'مسموح بالدخول', camera: '✅ مسموح بالدخول',
+               vibrate: 80,              tones: [{ f: 1000, type: 'sine', at: 0, dur: 0.15 }] },
+  duplicate: { autoMs: 6000, icon: 'x',      cls: 'rs-duplicate', status: 'تم استخدام هذه الدعوة مسبقًا!', camera: '🚫 تم استخدام هذه الدعوة مسبقًا',
+               vibrate: [150, 80, 150],  tones: [{ f: 220, type: 'square', at: 0, dur: 0.18 }, { f: 220, type: 'square', at: 0.26, dur: 0.18 }] },
+  denied:    { autoMs: 6000, icon: 'x',      cls: 'rs-denied',    status: 'باركود غير مسجّل', camera: '❌ باركود غير مسجّل',
+               vibrate: 300,             tones: [{ f: 220, type: 'square', at: 0, dur: 0.18 }, { f: 220, type: 'square', at: 0.26, dur: 0.18 }] },
+  error:     { autoMs: 0,    icon: 'alert',  cls: 'rs-error',     status: '', camera: '',
+               vibrate: 300,             tones: [{ f: 150, type: 'sawtooth', at: 0, dur: 0.7 }] },
+};
+
+// Audible feedback for busy door staff who can't watch the screen every
+// scan: one short high beep for allowed, a low double buzz for
+// duplicate/denied, one long low tone for a connection error.
+// iOS Safari starts an AudioContext suspended, so one shared context is
+// created and resumed on the supervisor's own taps (start camera, manual
+// check) and resumed again before each beep.
+function unlockAudio() {
+  try {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      audioCtx = new AC();
+    }
+    if (audioCtx.state !== 'running' && audioCtx.resume) {
+      const p = audioCtx.resume();
+      if (p && p.catch) p.catch(() => {});
+    }
+  } catch (e) {}
+}
+
+function playBeep(kind) {
+  try {
+    const def = RESULT_UI[kind];
+    if (!def) return;
+    unlockAudio();
+    if (!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    def.tones.forEach(t => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.frequency.value = t.f;
+      o.type = t.type;
+      g.gain.setValueAtTime(0.3, t0 + t.at);
+      g.gain.exponentialRampToValueAtTime(0.001, t0 + t.at + t.dur);
+      o.start(t0 + t.at);
+      o.stop(t0 + t.at + t.dur);
+    });
+  } catch (e) {}
+}
+
+let resultTimer = null, lastClearTimer = null, resultShownAt = 0, resultUp = false;
+
+let scanEpoch = 0;
+
+function sinceText(iso) {
+  const t = new Date(iso).getTime();
+  if (isNaN(t)) return '';
+  const sec = Math.max(0, Math.floor((Date.now() - t) / 1000));
+  if (sec < 3) return 'دخل قبل لحظات';
+  if (sec < 60) return 'دخل قبل ' + (sec === 1 ? 'ثانية' : sec === 2 ? 'ثانيتين' : sec + (sec <= 10 ? ' ثوانٍ' : ' ثانية'));
+  const min = Math.floor(sec / 60);
+  if (min < 60) return 'دخل قبل ' + (min === 1 ? 'دقيقة' : min === 2 ? 'دقيقتين' : min + (min <= 10 ? ' دقائق' : ' دقيقة'));
+  const d = new Date(t), h = d.getHours();
+  return 'دخل الساعة ' + (h % 12 || 12) + ':' + String(d.getMinutes()).padStart(2, '0') + ' ' + (h < 12 ? 'ص' : 'م');
+}
+
+function showResult(kind, name, vip, message, since) {
+  const def = RESULT_UI[kind];
+  const ov = document.getElementById('result-overlay');
+  if (document.getElementById('scanner-view').style.display === 'none') return;
+  clearTimeout(resultTimer); clearTimeout(lastClearTimer);
+  document.getElementById('manual-code').blur();
+  ov.className = def.cls;
+  document.getElementById('result-icon').innerHTML = ic(def.icon, 72);
+  document.getElementById('result-vip').style.display = vip ? 'inline-block' : 'none';
+  document.getElementById('result-name').textContent = name || '';
+  document.getElementById('result-status').textContent = message || def.status;
+  const sn = document.getElementById('result-since');
+  sn.textContent = since ? sinceText(since) : '';
+  sn.style.display = sn.textContent ? 'block' : 'none';
+  ov.style.display = 'flex';
+  void ov.offsetWidth;
+  ov.classList.add('rs-show');
+  scanCooldown = true;
+  resultUp = true;
+  resultShownAt = Date.now();
+  playBeep(kind);
+  try { if (navigator.vibrate) navigator.vibrate(def.vibrate); } catch (e) {}
+  if (def.autoMs) resultTimer = setTimeout(hideResult, def.autoMs);
+}
+
+// instant = the code path that is about to start a new check or tear the
+// scanner down: no delayed lastScanned reset, no camera-status rewrite.
+function hideResult(instant) {
+  clearTimeout(resultTimer); clearTimeout(lastClearTimer);
+  const ov = document.getElementById('result-overlay');
+  if (ov) ov.style.display = 'none';
+  const wasUp = resultUp;
+  resultUp = false;
+  if (instant === true) return;
+  scanCooldown = false;
+  if (wasUp) document.getElementById('camera-status').textContent = 'وجّه الكاميرا نحو الباركود';
+  lastClearTimer = setTimeout(() => { lastScanned = null; }, RESULT_UI.clearLastMs);
+}
+
+function onResultTap() {
+  if (Date.now() - resultShownAt < RESULT_UI.tapGuardMs) return;
+  hideResult();
+}
+
+// The door code is never kept on this page. Unlocking means asking the
+// server to open a door session for this device (under an anonymous identity —
+// door staff have no account) with the code they were given; the server
+// compares it with the real code and answers ok, wrong or locked. Every guest
+// read and every check-in is then gated on that session still being valid, so
+// "generate a new code" on the dashboard cuts every device off at once.
+let identityP = null;
+function ensureIdentity() {
+  if (curUser) return Promise.resolve(curUser);
+  if (identityP) return identityP;
+  identityP = (async () => {
+    const user = await Data.auth.signInAnon();
+    curUser = user;
+    return user;
+  })().finally(() => { identityP = null; });
+  return identityP;
+}
+
+// The anonymous sign-in is the slowest step after typing the code, so start
+// it while the code screen is still open. Fire and forget: checkPin calls
+// ensureIdentity() again and reports a failure itself. Skipped when the
+// device already has a user (admin, organizer, or a returning door device).
+function warmIdentity() {
+  if (curUser) return;
+  ensureIdentity().catch(() => {});
+}
+
+function showPinError(msg) {
+  const err = document.getElementById('pin-err');
+  err.textContent = msg;
+  err.style.display = 'block';
+}
+
+// Code screen texts. 'locked' = too many wrong codes from this device.
+const PIN_TEXT = {
+  wrong: 'رقم غير صحيح',
+  locked: 'الدخول مقفل مؤقتًا، حاول بعد قليل أو كلّم صاحب المناسبة',
+  offline: '⚠️ تعذّر الاتصال — تأكد من الإنترنت وحاول مرة ثانية',
+};
+
+async function checkPin(ev) {
+  const clickDelay = ev && ev.timeStamp ? performance.now() - ev.timeStamp : 0;
+  const val = document.getElementById('pin-input').value.trim();
+  document.getElementById('pin-err').style.display = 'none';
+  if (!val) return;
+
+  const tapAt = performance.now();
+  try {
+    await ensureIdentity();
+  } catch (e) {
+    console.error('anonymous sign-in failed:', e);
+    showPinError(PIN_TEXT.offline);
+    return;
+  }
+
+  const identityAt = performance.now();
+  let answer;
+  try {
+    answer = await Data.scan.start(eventId, val);
+  } catch (e) {
+    console.error(e);
+    showPinError(PIN_TEXT.offline);
+    return;
+  }
+  if (answer !== 'ok') {
+    showPinError(PIN_TEXT[answer] || PIN_TEXT.wrong);
+    return;
+  }
+  const writeAt = performance.now();
+  usesSessionDoc = true;
+  showScanner();
+  if (new URLSearchParams(location.search).get('timing') === '1') {
+    const shownAt = performance.now();
+    const ms = (n) => Math.round(n) + ' ms';
+    const text = 'هوية ' + ms(identityAt - tapAt) + ' · كتابة ' + ms(writeAt - identityAt) + ' · المجموع ' + ms(shownAt - tapAt) + ' · تأخير النقرة ' + ms(clickDelay);
+    console.log('scan timing:', text);
+    const line = document.createElement('div');
+    line.id = 'timing-line';
+    line.style.cssText = 'text-align:center;font-size:11px;opacity:0.5;margin-top:8px;';
+    line.textContent = text;
+    document.querySelector('.wrap').appendChild(line);
+  }
+}
+
+// True only for a device that got in by proving the code (a door session
+// exists for it). The organizer and the admin get in on their own account
+// and have nothing to re-check.
+let usesSessionDoc = false;
+let sessionTimer = null;
+let verifyingSession = false;
+
+// The counter poll notices a cut-off session within seconds; this asks again
+// directly: once a minute, and right when the page comes back to the
+// foreground or the phone regains signal (the moments a paused or offline
+// page would otherwise still look valid). A failed check for any reason other
+// than "refused" is ignored — a dropped connection must never throw door
+// staff out mid-event.
+async function verifySession() {
+  if (!usesSessionDoc || verifyingSession) return;
+  if (!curUser) return;
+  verifyingSession = true;
+  try {
+    const ok = await Data.scan.valid(eventId);
+    if (usesSessionDoc && !ok) sessionRevoked();
+  } catch (e) {
+    if (usesSessionDoc && isAccessLost(e)) sessionRevoked(e.code === 'auth-lost' ? 'signedout' : undefined);
+  } finally {
+    verifyingSession = false;
+  }
+}
+
+// The server refused this device (code changed / session gone) or the sign-in
+// itself is dead.
+function isAccessLost(e) {
+  return !!e && (e.code === 'no-session' || e.code === 'auth-lost' || e.code === 'permission');
+}
+
+function startSessionWatch() {
+  stopSessionWatch();
+  sessionTimer = setInterval(verifySession, 60000);
+}
+
+function stopSessionWatch() {
+  if (sessionTimer) { clearInterval(sessionTimer); sessionTimer = null; }
+}
+
+document.addEventListener('visibilitychange', () => { if (!document.hidden) verifySession(); });
+window.addEventListener('online', verifySession);
+
+// Why did this device just lose access? Two very different causes used to
+// show the same "the code changed" message:
+//  - 'signedout': the account this device was signed in with is gone. Sign-in
+//    is shared by every tab of ONE browser (never between two phones), so the
+//    organizer pressing "خروج" on the dashboard in another tab of the same
+//    browser signs this scanner tab out too;
+//  - 'code': the identity is still here but its session is refused — the
+//    organizer generated a new door code;
+//  - 'access': signed in as the organizer/admin, yet not allowed.
+function whyAccessLost() {
+  if (!curUser) return 'signedout';
+  return usesSessionDoc ? 'code' : 'access';
+}
+
+// This device stopped being accepted mid-event. Back to the code screen with
+// the real reason instead of a misleading "connection lost" banner, a
+// check-in that silently never completes, or a wrong "code changed" message.
+// reason: pass 'signedout' when the sign-in itself is known to be gone.
+function sessionRevoked(reason) {
+  const why = reason || whyAccessLost();
+  usesSessionDoc = false;
+  stopSessionWatch();
+  stopScanWatch();
+  if (qrScanner) {
+    try { qrScanner.stop(); } catch (_) {}
+    try { qrScanner.destroy(); } catch (_) {}
+    qrScanner = null;
+  }
+  scanEpoch++;
+  hideResult(true);
+  resetListState();
+  scanCooldown = false; lastScanned = null;
+  document.getElementById('scanner-view').style.display = 'none';
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-gate').style.display = 'block';
+  document.getElementById('pin-event-name').textContent = eventData ? eventData.name : '';
+  showPinError(why === 'code' ? '🔒 تغيّر كود الدخول — أدخل الكود الجديد'
+    : why === 'signedout' ? '🔓 تم تسجيل الخروج من الحساب على هذا الجهاز — أدخل رقم الدخول للمتابعة'
+    : '🔒 ما عاد عندك صلاحية على هذا الجهاز — أدخل رقم الدخول للمتابعة');
+}
+
+// Notices the sign-out itself, the moment it happens in another tab of this
+// browser, instead of waiting for the server to start refusing calls.
+// (lockDevice() signs out on purpose and shows the code screen itself.)
+let lockingDevice = false;
+function watchSignOut(initialUser) {
+  let hadUser = !!initialUser;
+  Data.auth.onChange((user) => {
+    curUser = user;
+    if (user) { hadUser = true; return; }
+    const scannerShowing = document.getElementById('scanner-view').style.display === 'block';
+    if (hadUser && !lockingDevice && scannerShowing) sessionRevoked('signedout');
+    hadUser = false;
+  });
+}
+
+function showAdminLogin() {
+  document.getElementById('admin-login-toggle').style.display = 'none';
+  document.getElementById('admin-login-card').style.display = 'block';
+  document.getElementById('admin-email').focus();
+}
+
+function hideAdminLogin() {
+  document.getElementById('admin-login-card').style.display = 'none';
+  document.getElementById('admin-login-toggle').style.display = 'block';
+  document.getElementById('admin-login-err').style.display = 'none';
+}
+
+// A real sign-in with the admin's own account, rather than a shared code —
+// this page's source is public (static hosting, no backend), so anything
+// written into it as a literal string is effectively public too. A real
+// password, checked by the server, isn't.
+async function submitAdminLogin() {
+  const email = document.getElementById('admin-email').value.trim();
+  const pass = document.getElementById('admin-pass').value;
+  const err = document.getElementById('admin-login-err');
+  const showErr = (msg) => { err.textContent = msg; err.style.display = 'block'; };
+  err.style.display = 'none';
+  if (!email || !pass) { showErr('عبّي البريد وكلمة المرور'); return; }
+
+  try {
+    if (identityP) { try { await identityP; } catch (e) {} }
+    const user = await Data.auth.signInWithPassword(email, pass);
+    curUser = user;
+    if (!(await Data.auth.isAdmin())) {
+      lockingDevice = true;
+      try { await Data.auth.signOut(); } finally { lockingDevice = false; }
+      curUser = null;
+      showErr('هذا الحساب ليس حساب الأدمن');
+      return;
+    }
+    usesSessionDoc = false;
+    showScanner();
+  } catch (e) {
+    const map = {
+      'invalid-credential': 'البريد أو كلمة المرور غلط',
+      'invalid-email': 'صيغة البريد غير صحيحة',
+    };
+    showErr(map[e.code] || ('خطأ: ' + e.message));
+  }
+}
+
+function showScanner() {
+  document.getElementById('pin-gate').style.display = 'none';
+  document.getElementById('pin-err').style.display = 'none';
+  document.getElementById('scanner-view').style.display = 'block';
+  document.getElementById('scan-event-name').textContent = eventData.name;
+  document.getElementById('new-scan-btn').style.display = 'block';
+  document.getElementById('offline-list-btn').style.display = 'block';
+  // Always shown, even for an admin auto-detected as already signed in on
+  // this device: hiding it here was the actual bug. A device that starts
+  // out auto-bypassing and a device where the admin just signed in
+  // manually look IDENTICAL after a reload — both are just "a device with
+  // a persisted admin session" — so there's no way to tell them apart to
+  // hide the button selectively. Hiding it meant that once an admin
+  // reloaded a borrowed phone, the only way to end that session vanished
+  // from the UI entirely.
+  const lockBtn = document.getElementById('lock-device-btn');
+  lockBtn.style.display = 'block';
+  const lockLabel = usesSessionDoc ? 'تسجيل خروج من هذا الجهاز' : 'إغلاق الماسح';
+  lockBtn.innerHTML = ic(usesSessionDoc ? 'log-out' : 'x', 14) + ' ' + lockLabel;
+  lockBtn.setAttribute('aria-label', lockLabel);
+  startScanData();
+  if (usesSessionDoc) startSessionWatch();
+}
+
+// Door-code devices sign out; the organizer or admin only closes the scanner
+// and goes back to the dashboard, keeping the sign-in (it is shared with the
+// organizer's other tabs of this browser).
+async function lockOrClose() {
+  if (usesSessionDoc) return lockDevice();
+  if (!curUser || curUser.isAnonymous) return lockDevice();
+  lockingDevice = true;
+  scanEpoch++;
+  hideResult(true);
+  resetListState();
+  stopSessionWatch();
+  stopScanWatch();
+  if (qrScanner) {
+    try { qrScanner.stop(); } catch (_) {}
+    try { qrScanner.destroy(); } catch (_) {}
+    qrScanner = null;
+  }
+  goTo('event.html?id=' + encodeURIComponent(eventId));
+}
+
+// Lets whoever is holding an unlocked device end their own session — e.g.
+// security staff handing a personal phone back at the end of their shift,
+// or an admin done checking in on a borrowed device — without needing the
+// owner to change the door code for everyone. Clears every source of
+// access this device could have: its proven-code session, and whatever
+// identity it's signed in with (anonymous, admin, or owner).
+async function lockDevice() {
+  lockingDevice = true;
+  scanEpoch++;
+  hideResult(true);
+  resetListState();
+  usesSessionDoc = false;
+  stopSessionWatch();
+  stopScanWatch();
+  if (curUser) {
+    try { await Data.scan.end(eventId); } catch (e) {}
+  }
+  try { await Data.auth.signOut(); } catch (e) {}
+  curUser = null;
+  document.getElementById('scanner-view').style.display = 'none';
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-err').style.display = 'none';
+  document.getElementById('pin-gate').style.display = 'block';
+  hideAdminLogin();
+  lockingDevice = false;
+}
+
+function offlineCacheKey() { return 'scan_offline_cache_' + eventId; }
+
+// Every check-in is verified by the server (that's what prevents two people
+// using the same barcode), so it can't work offline. But door staff still
+// need SOME fallback when the connection drops mid-event — being able to at
+// least read off a name is far better than nothing. This mirrors the last
+// successfully-synced guest list into localStorage on every update, so it
+// survives a disconnect (and even a page reload) independent of the network.
+function cacheGuestsOffline() {
+  const savedAt = new Date().toISOString();
+  listCacheSavedAt = savedAt;
+  try {
+    localStorage.setItem(offlineCacheKey(), JSON.stringify({
+      eventName: eventData ? eventData.name : '',
+      guests: guests.map(g => ({ name: g.name, id: g.id, scanned: !!g.scanned })),
+      savedAt: savedAt,
+      // When the list last came from the server — unlike savedAt, a scan on
+      // this device doesn't move it (see loadGuestsOnce).
+      loadedAt: guestsLoadedAt,
+      // Cursor for the delta sync of changed guests (see Data.scan.watch) and
+      // when that last ran; like loadedAt, a scan on this device leaves them.
+      syncedAt: syncCursor,
+      syncedOn: lastSyncAt ? new Date(lastSyncAt).toISOString() : null,
+    }));
+  } catch (e) {}
+}
+
+function readOfflineCache() {
+  try {
+    const raw = localStorage.getItem(offlineCacheKey());
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
+async function refreshOfflineList() {
+  const btn = document.getElementById('offline-refresh-btn');
+  const epoch = scanEpoch;
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري التحديث...';
+  pendingListId = null;
+  try {
+    await loadGuestsOnce(true);
+    if (epoch !== scanEpoch) return;
+    prepareListSource();
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = ic('refresh-cw', 14) + ' تحديث القائمة';
+    if (epoch === scanEpoch) renderOfflineList();
+  }
+}
+
+// "Check in by name": the same handleScan path as a QR scan, started from a
+// row of this list. Rows come from the in-memory `guests` array (the saved
+// copy only when that is empty, e.g. the event doc loaded but the guests did
+// not), so searching and registering add no reads. List-only mode (the event
+// doc could not be loaded, eventData null) never shows a register button.
+const LIST_MAX_ROWS = 60;
+const LIST_CONFIRM_GUARD_MS = 400;
+let pendingListId = null, listBusyId = null, listArmedAt = 0, listSearchTimer = null;
+let listCacheSavedAt = null, listFallback = null;
+const localCheckinTimes = {};
+const SYNC_STALE_MS = 10 * 60 * 1000;
+// A poll that was already on its way when this device checked a guest in can
+// still say "not entered" / the old count: for this long after a local
+// check-in such an answer never takes the guest or the counter back.
+const LOCAL_WIN_MS = 20000;
+const localAdmitAt = {};
+let countFloor = { value: 0, at: 0 };
+let syncCursor = null, lastSyncAt = null, deltaFailed = false, listLastChange = null;
+
+function prepareListSource() {
+  if (guests.length) return;
+  listFallback = readOfflineCache();
+  if (listFallback) listCacheSavedAt = listFallback.savedAt;
+}
+
+function listSource() {
+  if (guests.length) return guests;
+  return listFallback ? listFallback.guests : [];
+}
+
+function resetListState() {
+  clearTimeout(listSearchTimer);
+  pendingListId = null;
+  listBusyId = null;
+  if (document.getElementById('offline-list-section').style.display === 'block') renderOfflineList();
+}
+
+function toggleOfflineList() {
+  const section = document.getElementById('offline-list-section');
+  const showing = section.style.display === 'block';
+  section.style.display = showing ? 'none' : 'block';
+  clearTimeout(listSearchTimer);
+  pendingListId = null;
+  if (!showing) {
+    prepareListSource();
+    renderOfflineList();
+    if (scanWatch) scanWatch.refresh();
+  }
+}
+
+let listLastQuery = '';
+function onListSearchInput() {
+  clearTimeout(listSearchTimer);
+  const q = document.getElementById('offline-search').value;
+  if (q !== listLastQuery) { listLastQuery = q; pendingListId = null; }
+  listSearchTimer = setTimeout(renderOfflineList, 200);
+}
+
+function listTime(d) {
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+function listIsOpen() {
+  return document.getElementById('offline-list-section').style.display === 'block';
+}
+
+function listRowHtml(g, canCheckIn) {
+  const id = escapeHtml(g.id || '');
+  const name = escapeHtml(g.name || '');
+  if (canCheckIn && !g.scanned && pendingListId === g.id) {
+    return '<div class="ol-row ol-confirm" data-id="' + id + '">'
+      + '<div class="ol-cname">' + name + '</div>'
+      + '<div class="ol-ccode">الكود: <span dir="ltr">' + id + '</span></div>'
+      + '<div class="ol-cbtns"><button type="button" class="btn" data-act="confirm">تأكيد الدخول</button>'
+      + '<button type="button" class="btn ghost" data-act="cancel">إلغاء</button></div></div>';
+  }
+  const tag = escapeHtml(String(g.id || '').replace(/^WD-/i, '').slice(0, 4));
+  let right;
+  if (g.scanned) {
+    right = '<span class="ol-state ol-in">✓ دخل' + (localCheckinTimes[g.id] ? ' ' + localCheckinTimes[g.id] : '') + '</span>';
+  } else if (!canCheckIn) {
+    right = '<span class="ol-state">لسه</span>';
+  } else if (listBusyId === g.id) {
+    right = '<button type="button" class="ol-btn" disabled>جاري التسجيل…</button>';
+  } else {
+    right = '<button type="button" class="ol-btn" data-act="arm">تسجيل</button>';
+  }
+  return '<div class="ol-row" data-id="' + id + '"><span class="ol-name">' + name + '</span>'
+    + '<span class="ol-tag">' + tag + '</span>' + right + '</div>';
+}
+
+function renderOfflineList() {
+  const meta = document.getElementById('offline-list-meta');
+  const results = document.getElementById('offline-list-results');
+  const src = listSource();
+  if (!src.length && !listCacheSavedAt) {
+    meta.textContent = '⚠️ ما فيه نسخة محفوظة بعد — لازم تتصل بالإنترنت مرة وحدة أول عشان تتحفظ نسخة';
+    results.innerHTML = '';
+    return;
+  }
+  const canCheckIn = !!eventData;
+  const t = guests.length ? (lastSyncAt || guestsLoadedAt) : (listCacheSavedAt || guestsLoadedAt);
+  const savedTime = t ? new Date(t).toLocaleTimeString('ar-SA-u-nu-latn', { hour: '2-digit', minute: '2-digit' }) : '';
+  const notIn = src.filter(g => !g.scanned);
+  const stale = !!t && Date.now() - new Date(t).getTime() > SYNC_STALE_MS;
+  meta.className = 'sub' + (canCheckIn && (stale || deltaFailed) ? ' ol-stale' : '');
+  if (!canCheckIn) {
+    meta.textContent = '📋 آخر نسخة محفوظة (' + savedTime + ') — للقراءة فقط، ما تسجّل حضور';
+  } else if (deltaFailed) {
+    meta.textContent = 'تعذّر التحديث — الأسماء من ' + savedTime + ' · لم يدخل: ' + notIn.length + ' من ' + src.length;
+  } else {
+    meta.textContent = 'لم يدخل: ' + notIn.length + ' من ' + src.length + ' · آخر تحديث ' + savedTime + (stale ? ' — اضغط تحديث القائمة' : '');
+  }
+  const query = (document.getElementById('offline-search').value || '').trim();
+  const ql = query.toLowerCase();
+  const codeOk = query.length >= 3 || ql.indexOf('wd') === 0;
+  const filtered = query ? src.filter(g => (g.name || '').toLowerCase().includes(ql) || (codeOk && (g.id || '').toLowerCase().includes(ql))) : notIn;
+  const sorted = sortGuestsByName(filtered);
+  const rows = sorted.slice(0, LIST_MAX_ROWS);
+  let html = rows.map(g => listRowHtml(g, canCheckIn)).join('');
+  if (sorted.length > rows.length) {
+    html += '<div class="ol-note">' + (query
+      ? 'اكتب أكثر لتضييق النتائج (' + sorted.length + ' نتيجة)'
+      : 'يوجد ' + (sorted.length - rows.length) + ' ضيف آخر لم يدخل — اكتب للبحث') + '</div>';
+  }
+  const top = results.scrollTop;
+  if (html) results.innerHTML = html;
+  else if (!query && src.length) results.innerHTML = '<div class="sub" style="text-align:center; padding:16px 0;">الكل دخلوا ✓ (' + src.length + ' من ' + src.length + ')</div>';
+  else results.innerHTML = '<div class="sub" style="text-align:center; padding:16px 0;">ما فيه نتائج</div>';
+  results.scrollTop = top;
+}
+
+function armListRow(id) {
+  if (!eventData || listBusyId) return;
+  const g = listSource().find(x => x.id === id);
+  if (!g || g.scanned) return;
+  pendingListId = id;
+  listArmedAt = Date.now();
+  renderOfflineList();
+}
+
+function cancelListRow() {
+  pendingListId = null;
+  renderOfflineList();
+}
+
+function checkInFromList(id) {
+  if (pendingListId !== id || listBusyId) return;
+  if (Date.now() - listArmedAt < LIST_CONFIRM_GUARD_MS) return;
+  pendingListId = null;
+  listBusyId = id;
+  renderOfflineList();
+  unlockAudio();
+  lastScanned = null;
+  handleScan(id).catch(() => {}).then(() => {
+    if (listBusyId === id) { listBusyId = null; renderOfflineList(); }
+  });
+}
+
+document.getElementById('offline-search').addEventListener('input', onListSearchInput);
+document.getElementById('offline-list-results').addEventListener('click', (e) => {
+  const btn = e.target.closest ? e.target.closest('button[data-act]') : null;
+  if (!btn || btn.disabled) return;
+  const row = btn.closest('[data-id]');
+  if (!row) return;
+  const id = row.getAttribute('data-id');
+  const act = btn.getAttribute('data-act');
+  if (act === 'arm') armListRow(id);
+  else if (act === 'confirm') checkInFromList(id);
+  else if (act === 'cancel') cancelListRow();
+});
+
+// The scanned number comes from eventData.scannedCount, kept live by
+// Data.scan.watch (a poll every few seconds of one small row) rather than
+// from the guests array — this is what makes the counter reflect every
+// device's scans without downloading every guest. The total is the number of
+// guests in the list this page holds (kept current by the same watch).
+function updateScanCounter() {
+  const total = guests.length;
+  const scanned = eventData ? (eventData.scannedCount || 0) : 0;
+  document.getElementById('scan-counter').textContent = 'تم الدخول: ' + scanned + ' من ' + total; // "من", not "/": in RTL text "1 / 3" displays as "3 / 1"
+}
+
+// The count a poll reports never takes the counter below what this device
+// just got back from its own check-in (that poll may have been asked before the
+// check-in committed). After LOCAL_WIN_MS the server's number is taken as is,
+// so an undo done on the dashboard still shows.
+function applyServerCount(n) {
+  const held = Date.now() - countFloor.at < LOCAL_WIN_MS ? countFloor.value : 0;
+  eventData.scannedCount = Math.max(n || 0, held);
+}
+
+function stopScanWatch() {
+  if (scanWatch) { scanWatch.stop(); scanWatch = null; }
+}
+
+function onScanCounter(ev) {
+  if (!eventData) return;
+  eventData.lastChange = ev.lastChange;
+  eventData.guestCount = ev.guestCount;
+  applyServerCount(ev.scannedCount);
+  // nothing changed since the list was read: it is as fresh as this answer
+  if (ev.lastChange === listLastChange) {
+    lastSyncAt = Date.now();
+    if (deltaFailed) { deltaFailed = false; if (listIsOpen()) renderOfflineList(); }
+  }
+  updateScanCounter();
+}
+
+// A failed poll: a refused session sends the device back to the code screen;
+// a failed counter poll is a connection problem (the poller keeps trying), a
+// failed names poll keeps the list and says so in its meta line.
+function onScanError(e, kind) {
+  if (isAccessLost(e)) { sessionRevoked(e.code === 'auth-lost' ? 'signedout' : undefined); return; }
+  console.error('door poll error:', e);
+  if (kind === 'names') {
+    deltaFailed = true;
+    if (listIsOpen()) renderOfflineList();
+  }
+}
+
+// Folds server rows into the in-memory list (by id, so applying the same rows
+// twice changes nothing). full = rows are the whole list: guests that are no
+// longer in it were deleted. A guest this device checked in a moment ago is
+// not turned back to "not entered" by an answer that may predate it.
+function mergeGuests(rows, full) {
+  // times (✓ دخل HH:MM) only come from changed-names answers, as before; the full list has none
+  const byId = new Map();
+  guests.forEach(g => { byId.set(g.id, g); });
+  const seen = new Set();
+  rows.forEach(r => {
+    seen.add(r.id);
+    let g = byId.get(r.id);
+    if (!g) {
+      g = { docId: r.id, id: r.id };
+      guests.push(g);
+      byId.set(r.id, g);
+    }
+    g.name = r.name;
+    g.vip = r.vip;
+    const mine = localAdmitAt[r.id] && Date.now() - localAdmitAt[r.id] < LOCAL_WIN_MS;
+    g.scanned = r.scanned || (!!g.scanned && !!mine);
+    if (g.scanned) {
+      if (!full && !localCheckinTimes[r.id] && r.scannedAt) {
+        const when = new Date(r.scannedAt);
+        if (!isNaN(when.getTime())) localCheckinTimes[r.id] = listTime(when);
+      }
+      if (pendingListId === r.id) pendingListId = null;
+    } else {
+      delete localCheckinTimes[r.id];
+    }
+  });
+  if (full) guests = guests.filter(g => seen.has(g.id));
+}
+
+// Rows from Data.scan.watch (a delta, or the full list every minute).
+function onScanGuests(res) {
+  mergeGuests(res.rows, res.full);
+  syncCursor = res.cursor;
+  lastSyncAt = Date.now();
+  listLastChange = res.lastChange;
+  deltaFailed = false;
+  refreshConnectionBanner(true);
+  updateScanCounter();
+  cacheGuestsOffline();
+  if (listIsOpen()) renderOfflineList();
+}
+
+// Without this, a dropped connection looks identical to an empty/stale
+// list, and door staff can't tell a real "not registered" scan from a
+// network hiccup.
+function refreshConnectionBanner(ok) {
+  const b = document.getElementById('connection-banner');
+  if (b) b.style.display = ok ? 'none' : 'block';
+}
+
+// A copy this device downloaded less than OFFLINE_LIST_MAX_AGE ago is shown
+// at once (the watch then catches it up from its cursor, and the minute-by-
+// minute full read corrects anything the cursor cannot see, such as deleted
+// guests). "🔄 تحديث القائمة" forces a fresh full download.
+const OFFLINE_LIST_MAX_AGE = 3 * 60 * 60 * 1000;
+let guestsLoadedAt = null;
+async function loadGuestsOnce(force) {
+  const cached = readOfflineCache();
+  if (!force && cached && cached.loadedAt && cached.syncedAt && Date.now() - new Date(cached.loadedAt).getTime() < OFFLINE_LIST_MAX_AGE) {
+    guests = cached.guests.map(g => ({ docId: g.id, ...g }));
+    guestsLoadedAt = cached.loadedAt;
+    listCacheSavedAt = cached.savedAt;
+    syncCursor = cached.syncedAt;
+    lastSyncAt = cached.syncedOn ? new Date(cached.syncedOn).getTime() : null;
+    listLastChange = null;
+    updateScanCounter();
+    return 'cache';
+  }
+  const epoch = scanEpoch;
+  const hadList = guests.length > 0;
+  const changeBefore = eventData ? eventData.lastChange : undefined;
+  try {
+    const res = await Data.scan.guests(eventId, null);
+    if (epoch !== scanEpoch) return 'stale';
+    mergeGuests(res.rows, true);
+    syncCursor = res.cursor;
+    lastSyncAt = Date.now();
+    listLastChange = changeBefore === undefined ? null : changeBefore;
+    deltaFailed = false;
+    guestsLoadedAt = new Date().toISOString();
+    updateScanCounter();
+    refreshConnectionBanner(true);
+    cacheGuestsOffline();
+    return 'full';
+  } catch (error) {
+    if (epoch !== scanEpoch) return 'stale';
+    console.error('guests load error:', error);
+    if (isAccessLost(error)) { sessionRevoked(error.code === 'auth-lost' ? 'signedout' : undefined); return 'stale'; }
+    if (hadList) { deltaFailed = true; return 'failed'; }
+    refreshConnectionBanner(false);
+    return 'failed';
+  }
+}
+
+// Opens the scanner's data: the list first (so the watch's cursor matches it),
+// then the polls.
+async function startScanData() {
+  stopScanWatch();
+  const epoch = scanEpoch;
+  await loadGuestsOnce();
+  if (epoch !== scanEpoch) return;
+  scanWatch = Data.scan.watch(eventId, {
+    since: syncCursor,
+    lastChange: listLastChange,
+    onCounter: onScanCounter,
+    onGuests: onScanGuests,
+    onError: onScanError,
+  });
+}
+
+// Used to just clear the result cards and assume the camera was still
+// healthy — if the stream had actually died or gotten stuck for any reason,
+// "مسح جديد" looked like it did nothing, with no way to recover short of
+// reloading the page. The retired legacy site's equivalent button fully
+// tore the scanner down and put the UI back at "press to start" every
+// time; doing the same here means every tap is a guaranteed-fresh start
+// instead of trusting whatever state the camera happens to be in.
+function resetScanState() {
+  if (qrScanner) {
+    try { qrScanner.stop(); } catch (_) {}
+    try { qrScanner.destroy(); } catch (_) {}
+    qrScanner = null;
+  }
+  scanEpoch++;
+  hideResult(true);
+  resetListState();
+  scanCooldown = false;
+  lastScanned = null;
+  document.getElementById('manual-code').value = '';
+  document.getElementById('camera-wrapper').style.display = 'none';
+  document.getElementById('start-cam-btn').style.display = 'block';
+  document.getElementById('camera-status').textContent = 'اضغط لتشغيل الكاميرا';
+}
+
+function submitManualCode() {
+  unlockAudio();
+  const input = document.getElementById('manual-code');
+  input.blur();
+  const raw = input.value.trim();
+  if (!raw) return;
+  const match = raw.toUpperCase().match(/WD-[A-Z0-9]+/);
+  if (!match) {
+    document.getElementById('camera-status').textContent = '⚠️ صيغة الكود غير صحيحة';
+    return;
+  }
+  input.value = '';
+  lastScanned = null;
+  handleScan(match[0]);
+}
+
+// "Add to Home Screen" now uses the current address-bar URL directly (see
+// the <head> comment on why there's no <link rel="manifest">), so a
+// properly-added icon already opens straight into the right event. This is
+// just a safety net for the rare case scan.html gets opened with no
+// ?event= at all — remember the last event this device scanned for, and
+// silently redirect back into it instead of a dead end.
+function lastEventKey() { return 'scan_last_event'; }
+
+async function init() {
+  if (!eventId) {
+    let lastEvent = null;
+    try { lastEvent = localStorage.getItem(lastEventKey()); } catch (e) {}
+    if (lastEvent) { window.location.replace('scan.html?event=' + lastEvent); return; }
+    document.getElementById('loading-msg').textContent = '⚠️ رابط غير صحيح';
+    return;
+  }
+  try { localStorage.setItem(lastEventKey(), eventId); } catch (e) {}
+  let ev;
+  try {
+    ev = await Data.invite.event(eventId);
+  } catch (e) {
+    // Same "trapped forever" failure the splash fix closed, one layer
+    // deeper: a dropped connection here (bad venue wifi) used to leave
+    // this stuck on "جاري التحميل..." forever with no way out. This is
+    // the page door staff depend on, so it gets a visible, tappable retry
+    // instead of silently hanging.
+    console.error(e);
+    const msg = document.getElementById('loading-msg');
+    msg.textContent = '⚠️ تعذّر الاتصال — اضغط هنا للمحاولة مرة ثانية';
+    msg.style.cursor = 'pointer';
+    msg.onclick = () => { msg.onclick = null; msg.style.cursor = ''; init(); };
+    // Can't even fetch the event to unlock the scanner, but if this device
+    // synced successfully before (set up earlier with a working connection),
+    // it already has a saved guest list — offer that instead of leaving
+    // staff with nothing but "try again" while a line forms at the door.
+    if (readOfflineCache()) {
+      const fallbackBtn = document.createElement('button');
+      fallbackBtn.className = 'btn ghost';
+      fallbackBtn.style.marginTop = '14px';
+      fallbackBtn.innerHTML = ic('list', 16) + ' عرض آخر نسخة محفوظة بدون إنترنت';
+      fallbackBtn.onclick = () => {
+        document.getElementById('loading-msg').style.display = 'none';
+        document.getElementById('scanner-view').style.display = 'block';
+        document.getElementById('scan-event-name').textContent = readOfflineCache().eventName;
+        document.getElementById('offline-list-btn').style.display = 'none';
+        document.getElementById('start-cam-btn').style.display = 'none';
+        document.getElementById('new-scan-btn').style.display = 'none';
+        toggleOfflineList();
+      };
+      msg.insertAdjacentElement('afterend', fallbackBtn);
+    }
+    return;
+  }
+  if (!ev) {
+    document.getElementById('loading-msg').textContent = '⚠️ هذه المناسبة غير موجودة';
+    return;
+  }
+  eventData = ev;
+  applyEventTheme(eventData.theme);
+
+  const user = await Data.auth.current();
+  curUser = user;
+  document.getElementById('loading-msg').style.display = 'none';
+  watchSignOut(user);
+
+  // A device that is signed in may already be let in: the admin, the event's
+  // own organizer (their real sign-in proves it, no need to type their own
+  // code), or a device that unlocked before — the anonymous identity this page
+  // signs it in with is restored across reloads, and so is a customer's real
+  // account if they were signed in when they typed the code. The server
+  // answers the door call only while that is still true; a refusal here means
+  // the organizer changed the code (or the sign-in is gone), and either way
+  // the answer is the same: ask for the code.
+  if (user) {
+    try {
+      const [live, sess] = await Promise.all([Data.scan.event(eventId), Data.scan.valid(eventId).catch(() => false)]);
+      if (live) {
+        eventData.scannedCount = live.scannedCount;
+        eventData.guestCount = live.guestCount;
+        eventData.lastChange = live.lastChange;
+        usesSessionDoc = sess;
+        showScanner();
+        return;
+      }
+    } catch (e) {}
+  }
+
+  document.getElementById('pin-gate').style.display = 'block';
+  document.getElementById('pin-event-name').textContent = eventData.name;
+  warmIdentity();
+}
+
+const dbg = { started: false, decodes: 0, errCount: 0, lastDecodeError: '', lastError: '', formats: '...', hasCamera: '...' };
+const DEBUG_MODE = new URLSearchParams(location.search).get('debug') === '1';
+
+function startDebugPanel() {
+  if (!DEBUG_MODE) return;
+  const panel = document.createElement('pre');
+  panel.id = 'debug-panel';
+  panel.style.cssText = 'direction:ltr;text-align:left;font:11px/1.5 monospace;white-space:pre-wrap;word-break:break-all;background:#111;color:#9fe;border:1px solid #333;border-radius:8px;padding:8px;margin-top:10px;';
+  document.getElementById('camera-wrapper').insertAdjacentElement('afterend', panel);
+  const ua = navigator.userAgent;
+  const m = ua.match(/(?:Chrome|CriOS)\/(\d+[\d.]*)/);
+  if (window.BarcodeDetector && BarcodeDetector.getSupportedFormats) {
+    BarcodeDetector.getSupportedFormats().then(f => { dbg.formats = f.join(','); }).catch(e => { dbg.formats = 'error: ' + e; });
+  } else {
+    dbg.formats = '-';
+  }
+  if (typeof QrScanner !== 'undefined') {
+    QrScanner.hasCamera().then(v => { dbg.hasCamera = String(v); }).catch(e => { dbg.hasCamera = 'error: ' + e; });
+  } else {
+    dbg.hasCamera = 'no QrScanner';
+  }
+  window.addEventListener('error', e => { dbg.lastError = e.message; });
+  window.addEventListener('unhandledrejection', e => { dbg.lastError = String((e.reason && e.reason.message) || e.reason); });
+  const video = document.getElementById('camera-video');
+  const tick = () => {
+    const text = [
+      'المتصفح: ' + ua,
+      'إصدار Chrome: ' + (m ? m[1] : '-'),
+      'BarcodeDetector: ' + (window.BarcodeDetector ? 'yes' : 'no') + ' | الصيغ: ' + dbg.formats,
+      'hasCamera: ' + dbg.hasCamera,
+      'الفيديو: ' + video.videoWidth + 'x' + video.videoHeight + ' | readyState: ' + video.readyState,
+      'QrScanner بدأ: ' + (dbg.started ? 'yes' : 'no'),
+      'أخطاء القراءة: ' + dbg.errCount + ' | آخر خطأ قراءة: ' + (dbg.lastDecodeError || '-'),
+      'قراءات ناجحة: ' + dbg.decodes,
+      'آخر خطأ: ' + (dbg.lastError || '-')
+    ].join('\n');
+    panel.textContent = text;
+    console.log('scan debug:', text);
+  };
+  tick();
+  setInterval(tick, 1000);
+}
+startDebugPanel();
+
+async function startCamera() {
+  unlockAudio();
+  const video = document.getElementById('camera-video');
+  const status = document.getElementById('camera-status');
+  status.textContent = 'جاري تشغيل الكاميرا...';
+
+  // The qr-scanner library CDN script can fail to load entirely (network
+  // hiccup, a content blocker on the phone) with nothing on screen to show
+  // for it — surface that plainly instead of the button silently doing
+  // nothing, which is impossible to tell apart from "still loading".
+  if (typeof QrScanner === 'undefined') {
+    status.textContent = '⚠️ تعذّر تحميل مكتبة الكاميرا — تأكد من الاتصال بالإنترنت وحدّث الصفحة';
+    return;
+  }
+
+  // Ask for camera access ourselves first, as the very first thing in this
+  // click handler with nothing awaited before it — that's what makes Safari
+  // reliably show its permission prompt instead of silently going nowhere,
+  // and it gets us a specific, actionable error (denied vs. no camera vs.
+  // insecure context) instead of QrScanner's internal retries failing quietly.
+  try {
+    const probe = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    probe.getTracks().forEach(t => t.stop());
+  } catch (e) {
+    dbg.lastError = (e.name || '') + ' ' + (e.message || e);
+    status.textContent = e.name === 'NotAllowedError'
+      ? '⚠️ إذن الكاميرا مرفوض — فعّله من إعدادات الآيفون: الإعدادات ← Safari ← الكاميرا'
+      : '⚠️ تعذّر الوصول للكاميرا: ' + (e.name || '') + ' — ' + (e.message || e);
+    return;
+  }
+
+  let retries = 2;
+  while (retries >= 0) {
+    try {
+      qrScanner = new QrScanner(video, result => {
+        dbg.decodes++;
+        if (!scanCooldown) handleScan(result.data);
+      }, {
+        returnDetailedScanResult: true,
+        preferredCamera: 'environment',
+        onDecodeError: err => {
+          const msg = String((err && err.message) || err);
+          if (msg === 'No QR code found') return;
+          dbg.errCount++;
+          dbg.lastDecodeError = msg;
+        }
+      });
+      await qrScanner.start();
+      dbg.started = true;
+      document.getElementById('camera-wrapper').style.display = 'block';
+      document.getElementById('start-cam-btn').style.display = 'none';
+      status.textContent = 'وجّه الكاميرا نحو الباركود';
+      return;
+    } catch (e) {
+      if (qrScanner) { try { qrScanner.destroy(); } catch (_) {} qrScanner = null; }
+      retries--;
+      if (retries < 0) {
+        dbg.lastError = (e.name || '') + ' ' + (e.message || e);
+        status.textContent = '⚠️ خطأ: ' + (e.name || '') + ' — ' + (e.message || e);
+      } else {
+        status.textContent = 'إعادة المحاولة...';
+        await new Promise(r => setTimeout(r, 800));
+      }
+    }
+  }
+}
+
+async function handleScan(raw) {
+  const match = raw.trim().toUpperCase().match(/WD-[A-Z0-9]+/);
+  if (!match) return;
+  const val = match[0];
+  if (val === lastScanned) return;
+  hideResult(true);
+  const epoch = scanEpoch;
+  lastScanned = val;
+  scanCooldown = true;
+
+  const status = document.getElementById('camera-status');
+  status.textContent = '🔍 جاري التحقق...';
+
+  // The guest's own barcode text IS its id, so this goes straight to the one
+  // guest — no list read, and no dependency on the loaded `guests` array
+  // staying in sync. The server decides in one atomic step whether the guest
+  // is unknown ("not registered"), already in, or admitted now, so two devices
+  // scanning the same guest at once can't both win. There is no automatic
+  // retry: if the answer is lost, scanning again gets "already used" when the
+  // first one went through.
+  let res;
+  try {
+    res = await Data.scan.checkIn(eventId, val);
+  } catch (e) {
+    // A failed check-in used to escape this function entirely, which left
+    // scanCooldown stuck on true — the scanner silently ignored every
+    // barcode after one network hiccup until "مسح جديد" was pressed.
+    console.error('check-in failed:', e);
+    if (epoch !== scanEpoch) return;
+    if (isAccessLost(e)) {
+      sessionRevoked(e.code === 'auth-lost' ? 'signedout' : undefined);
+      return;
+    }
+    status.textContent = '⚠️ تعذّر تسجيل الدخول — تأكد من الإنترنت وحاول مرة ثانية';
+    lastScanned = null;
+    showResult('error', 'تعذّر تسجيل الدخول', false, 'تأكد من الإنترنت وحاول مرة ثانية');
+    return;
+  }
+  if (res.outcome === 'no_session') {
+    if (epoch === scanEpoch) sessionRevoked();
+    return;
+  }
+  const stale = epoch !== scanEpoch;
+  const outcome = res.outcome;
+  if (!stale) {
+    if (outcome === 'allowed') {
+      showResult('allowed', res.guestName, res.vip);
+      status.textContent = RESULT_UI.allowed.camera;
+    } else if (outcome === 'duplicate') {
+      showResult('duplicate', res.guestName, res.vip, undefined, res.scannedAt);
+      status.textContent = RESULT_UI.duplicate.camera;
+    } else {
+      showResult('denied', 'غير مسجّل', false);
+      status.textContent = RESULT_UI.denied.camera;
+    }
+  }
+  if (outcome === 'allowed' || outcome === 'duplicate') {
+    // Keep the counter, the names list and its saved copy in step with what
+    // this device just learned (a duplicate means the guest is already in,
+    // whoever checked them in).
+    if (outcome === 'allowed') localCheckinTimes[val] = listTime(new Date());
+    localAdmitAt[val] = Date.now();
+    if (eventData && typeof res.scannedCount === 'number') {
+      countFloor = { value: res.scannedCount, at: Date.now() };
+      eventData.scannedCount = Math.max(eventData.scannedCount || 0, res.scannedCount);
+    }
+    updateScanCounter();
+    if (!guests.length && listFallback) {
+      // The list is showing the saved copy: keep it as is (no one-guest `guests`
+      // array, which would shrink the list and the counter total).
+      const fb = listFallback.guests.find(g => g.id === val);
+      if (fb) fb.scanned = true;
+    } else {
+      const cached = guests.find(g => g.id === val);
+      if (cached) cached.scanned = true;
+      else guests.push({ docId: val, id: val, name: res.guestName, scanned: true });
+      updateScanCounter();
+      cacheGuestsOffline();
+    }
+    if (document.getElementById('offline-list-section').style.display === 'block') renderOfflineList();
+  } else if (outcome === 'not_found') {
+    // Deleted by the organizer after this list was read: drop the stale row.
+    const i = guests.findIndex(g => g.id === val);
+    if (i >= 0) {
+      guests.splice(i, 1);
+      updateScanCounter();
+      cacheGuestsOffline();
+      if (listIsOpen()) renderOfflineList();
+    }
+  }
+}
+
+init();
+
+window.addEventListener('load', () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch((e) => console.error('SW registration failed:', e));
+  }
+});
+</script>
+</body>
+</html>

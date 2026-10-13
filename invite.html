@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- If one of this page's own script files fails to download (a weak phone
+     signal), the page would open half-working with no message — a dashboard
+     with no invite link, a login button that does nothing. Offer a reload. -->
+<script>window.addEventListener('error', function (e) {
+  var t = e.target;
+  if (!t || t.tagName !== 'SCRIPT' || !t.src || t.src.indexOf(location.origin + '/') !== 0) return;
+  function show() {
+    if (document.getElementById('load-fail')) return;
+    var d = document.createElement('div');
+    d.id = 'load-fail'; d.setAttribute('role', 'alert');
+    d.textContent = '⚠️ ما اكتمل تحميل الصفحة بسبب ضعف الإنترنت — اضغط هنا لإعادة التحميل';
+    d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:100000;background:#b3261e;color:#fff;padding:14px 16px;text-align:center;font:600 15px/1.6 sans-serif;cursor:pointer;';
+    d.onclick = function () { location.reload(); };
+    document.body.appendChild(d);
+  }
+  if (document.body) show(); else document.addEventListener('DOMContentLoaded', show);
+}, true);</script>
+<title>دعوة | دعوات</title>
+<!-- What WhatsApp and other apps show when an invitation link is shared.
+     These are fixed files with no server, so it is the same card for every
+     event (the event's own name only appears once the page opens). -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_SA">
+<meta property="og:site_name" content="دعوات">
+<meta property="og:title" content="لديك دعوة خاصة 💌">
+<meta property="og:description" content="افتح الرابط لتشاهد تفاصيل المناسبة وتأكّد حضورك.">
+<meta property="og:image" content="https://da3wt.com/icons/og-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="دعوات — دعوة رقمية">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="لديك دعوة خاصة 💌">
+<meta name="twitter:description" content="افتح الرابط لتشاهد تفاصيل المناسبة وتأكّد حضورك.">
+<meta name="twitter:image" content="https://da3wt.com/icons/og-image.jpg">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://gunizkapwatixvbfliva.supabase.co">
+<link rel="preload" as="font" type="font/woff2" href="fonts/ibm-plex-sans-arabic-400-arabic.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/reem-kufi-700-arabic.woff2" crossorigin>
+<style>
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-400-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-500-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-700-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Playfair Display';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/playfair-display-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Reem Kufi';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/reem-kufi-700-arabic.woff2) format('woff2');unicode-range:U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1}
+@font-face{font-family:'Reem Kufi';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/reem-kufi-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  /* ===== THEME SYSTEM — matches app.html/event.html ===== */
+  :root, [data-theme="gold"] {
+    --gold:#E0BC7A; --gold-deep:#C99B4A;
+    --bg-base:#0A0A0A; --bg-1:#0C0C0C; --bg-2:#060606;
+    --glow-1:rgba(var(--accent-rgb),0.12); --glow-2:rgba(201,155,74,0.08);
+    --accent-rgb:224,188,122; --text-main:#FAF8F4; --text-soft:#B8B4AC;
+    --glass-bg:rgba(255,255,255,0.035);
+  }
+  [data-theme="rose"] {
+    --gold:#E8B4B8; --gold-deep:#C9879A;
+    --bg-base:#14090C; --bg-1:#1A0C10; --bg-2:#0E0608;
+    --glow-1:rgba(232,180,184,0.14); --glow-2:rgba(201,135,154,0.10);
+    --accent-rgb:232,180,184; --text-main:#FAF4F4; --text-soft:#C9B4B6;
+    --glass-bg:rgba(255,255,255,0.035);
+  }
+  [data-theme="emerald"] {
+    --gold:#D4AF7F; --gold-deep:#B08D57;
+    --bg-base:#07120E; --bg-1:#0A1812; --bg-2:#040C08;
+    --glow-1:rgba(var(--accent-rgb),0.12); --glow-2:rgba(46,125,90,0.14);
+    --accent-rgb:212,175,127; --text-main:#F4FAF6; --text-soft:#AEC2B7;
+    --glass-bg:rgba(255,255,255,0.035);
+  }
+  [data-theme="sapphire"] {
+    --gold:#B8C6E0; --gold-deep:#8A9DC9;
+    --bg-base:#080C16; --bg-1:#0C1220; --bg-2:#04060E;
+    --glow-1:rgba(184,198,224,0.12); --glow-2:rgba(138,157,201,0.12);
+    --accent-rgb:184,198,224; --text-main:#F4F6FA; --text-soft:#AEB7C9;
+    --glass-bg:rgba(255,255,255,0.035);
+  }
+  [data-theme="ivory"] {
+    --gold:#B08D57; --gold-deep:#9C7A45;
+    --bg-base:#F6F1E7; --bg-1:#FAF6EE; --bg-2:#EFE7D6;
+    --glow-1:rgba(176,141,87,0.10); --glow-2:rgba(176,141,87,0.07);
+    --accent-rgb:176,141,87; --text-main:#2A2419; --text-soft:#7A7060;
+    --glass-bg:rgba(255,255,255,0.55);
+  }
+  /* The ivory accent is too light for text on its cream background (2.8:1);
+     text in the accent colour uses a deeper tone (4.7:1). Buttons keep theirs. */
+  [data-theme="ivory"] h1, [data-theme="ivory"] .inv-kind, [data-theme="ivory"] .countdown,
+  [data-theme="ivory"] .maps-link, [data-theme="ivory"] .guest-name, [data-theme="ivory"] .btn.kind-btn,
+  [data-theme="ivory"] .rsvp-note b, [data-theme="ivory"] .pend-note b { color:#86672F; }
+
+  body {
+    font-family:'IBM Plex Sans Arabic',sans-serif; background:var(--bg-base); color:var(--text-main); min-height:100vh;
+    display:flex; align-items:center; justify-content:center; padding:20px; position:relative; overflow-x:hidden;
+    transition:background 0.4s ease, color 0.4s ease;
+  }
+  body::before {
+    content:''; position:fixed; top:0; right:0; bottom:0; left:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, var(--glow-1), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, var(--glow-2), transparent 55%),
+      linear-gradient(160deg, var(--bg-1) 0%, var(--bg-base) 50%, var(--bg-2) 100%);
+  }
+  .card {
+    position:relative; z-index:1; width:100%; max-width:380px;
+    background:var(--glass-bg); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    border:1px solid rgba(var(--accent-rgb),0.3); border-radius:22px; padding:42px 30px; text-align:center;
+    box-shadow:0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .card-wait { min-height:600px; }
+  .ornament { font-size:20px; color:var(--gold); letter-spacing:8px; margin-bottom:14px; animation:float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-6px); } }
+  h1 { font-family:'Playfair Display','IBM Plex Sans Arabic',serif; color:var(--gold); font-size:24px; font-weight:700; margin-bottom:6px; letter-spacing:0.3px; overflow-wrap:anywhere; }
+  .sub { color:var(--text-soft); font-size:12.5px; margin-bottom:24px; overflow-wrap:anywhere; }
+  /* The kind of event above its name, and the owner's welcome line (the same
+     one they share on WhatsApp) under the date. */
+  .inv-kind { font-size:12px; letter-spacing:1px; color:var(--gold); opacity:0.85; margin-bottom:6px; }
+  .inv-msg { margin:18px 4px 4px; padding:16px 16px 14px; border-radius:14px; background:rgba(var(--accent-rgb),0.06); border:1px solid rgba(var(--accent-rgb),0.18); color:var(--text-main); font-size:14.5px; line-height:1.9; white-space:pre-line; overflow-wrap:anywhere; position:relative; }
+  .inv-msg::before { content:'❝'; position:absolute; top:-11px; right:14px; font-size:18px; line-height:1; color:var(--gold); }
+  /* What happens after "تأكيد الحضور": the request waits for approval, then the
+     barcode card appears on this same link. Named per kind (EVENT_TYPES.approver). */
+  .rsvp-note { display:flex; gap:8px; align-items:flex-start; text-align:right; margin-top:14px; padding:11px 13px; border-radius:12px; background:rgba(var(--accent-rgb),0.06); border:1px dashed rgba(var(--accent-rgb),0.3); color:var(--text-soft); font-size:12.5px; line-height:1.8; }
+  .rsvp-note b, .pend-note b { color:var(--gold); }
+  .pend-note { margin-top:14px; color:var(--text-soft); font-size:13px; line-height:1.9; }
+  .gold-line { width:56px; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:22px auto; }
+  .maps-link { display:inline-block; color:var(--gold); font-size:12.5px; text-decoration:none; border:1px solid rgba(var(--accent-rgb),0.4); border-radius:20px; padding:7px 16px; margin-bottom:16px; }
+  .countdown { font-size:12.5px; color:var(--gold); margin-bottom:16px; letter-spacing:0.3px; }
+  input { width:100%; padding:13px; margin-bottom:14px; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(var(--accent-rgb),0.25); color:var(--text-main); font-size:16px; font-family:inherit; text-align:center; }
+  input:focus { outline:none; border-color:var(--gold); }
+  .btn:disabled { opacity:0.6; cursor:default; }
+  .form-msg { margin-top:12px; font-size:13px; line-height:1.8; color:#e8a0a0; }
+  .form-msg.info { color:var(--text-soft); }
+  .help-line { margin-top:10px; font-size:12.5px; color:var(--text-soft); line-height:1.8; }
+  .btn { width:100%; padding:14px; border:none; border-radius:10px; background:linear-gradient(135deg,var(--gold-deep),var(--gold)); color:#1a1400; font-weight:700; font-size:15px; cursor:pointer; }
+  .btn.kind-btn { display:flex; align-items:center; justify-content:center; gap:14px; text-decoration:none; margin-top:12px; padding:12px 16px; font-size:19px; background:rgba(255,255,255,0.04); border:1px solid var(--gold); color:var(--gold); }
+  .kind-ico { height:46px; width:auto; }
+  .status-icon { font-size:44px; margin-bottom:10px; }
+  .status-msg { font-size:15px; line-height:1.9; }
+  #qr-box { margin-top:18px; padding:16px; background:#fff; border-radius:12px; display:inline-block; }
+  .guest-name { color:var(--gold); font-weight:700; margin-top:14px; font-size:15px; }
+
+  #splash { position:fixed; top:0; right:0; bottom:0; left:0; z-index:9999; display:flex; align-items:center; justify-content:center; transition:opacity 0.4s ease, visibility 0.4s ease; overflow:hidden; background:radial-gradient(ellipse at center, var(--bg-1) 0%, var(--bg-base) 70%); }
+  #splash::before { content:''; position:absolute; width:460px; height:460px; border-radius:50%; background:radial-gradient(circle, rgba(var(--accent-rgb),0.12), transparent 70%); animation:splashPulse 3.5s ease-in-out infinite; }
+  #splash.hide { opacity:0; visibility:hidden; }
+  .splash-inner { text-align:center; position:relative; z-index:1; animation:splashFade 1.2s cubic-bezier(0.2,0.8,0.2,1); }
+  .splash-rings { animation:splashRingsIn 1.4s cubic-bezier(0.2,0.8,0.2,1), float 3.5s ease-in-out 1.4s infinite; margin-bottom:26px; filter:drop-shadow(0 6px 26px rgba(var(--accent-rgb),0.45)); }
+  .splash-title { font-family:'Reem Kufi','Playfair Display',sans-serif; font-size:42px; font-weight:700; color:var(--gold); letter-spacing:1px; margin-bottom:8px; text-shadow:0 2px 24px rgba(var(--accent-rgb),0.3); }
+  .splash-subtitle { font-family:'Playfair Display',serif; font-size:16px; font-weight:400; color:var(--gold); letter-spacing:6px; text-transform:uppercase; opacity:0.75; margin-bottom:4px; }
+  .splash-line { width:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:20px auto 0; animation:splashLineGrow 1.6s ease-out 0.6s forwards; }
+  @keyframes splashFade { from { opacity:0; transform:translateY(20px) scale(0.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+  @keyframes splashRingsIn { from { opacity:0; transform:scale(0.7) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  @keyframes splashLineGrow { from { width:0; } to { width:140px; } }
+  @keyframes splashPulse { 0%,100% { transform:scale(0.9); opacity:0.5; } 50% { transform:scale(1.1); opacity:1; } }
+  svg.ic { flex-shrink:0; vertical-align:middle; }
+</style>
+</head>
+<body>
+  <div id="splash">
+    <div class="splash-inner">
+      <div class="splash-rings"><img src="icons/logo.svg" alt="" style="display:block; margin:0 auto; height:104px; width:104px;"></div>
+      <div class="splash-title">دعوات</div>
+      <div class="splash-subtitle">Digital Invitations</div>
+      <div class="splash-line"></div>
+    </div>
+  </div>
+  <script>
+  // The opening splash matches the kind of event: its own picture and title.
+  // The sample invitation (?demo=1) knows it from ?type= (none picked yet: the
+  // neutral logo). A real invitation only learns it once the event loads, so it
+  // starts from the kind this device saw last time for this link (instant on a
+  // repeat visit), otherwise the neutral logo, and showInviteKind() fades the
+  // right one in when the event arrives. Runs before first paint and depends
+  // on nothing else, so it's inline, guarded, and tiny.
+  (function () {
+    try {
+      const p = new URLSearchParams(location.search);
+      const KINDS = {
+        wedding:    ['دعوة زفاف', 'Wedding Invitation', 'kind-wedding.svg'],
+        graduation: ['دعوة حفل تخرج', 'Graduation Invitation', 'kind-graduation.svg'],
+        event:      ['دعوة فعالية', 'Event Invitation', 'kind-event.svg'],
+      };
+      const LOGO = ['دعوات', 'Digital Invitations', 'logo.svg'];
+      // hasOwnProperty, so ?type=constructor and the like can't pick up inherited keys.
+      const kindOf = (t) => Object.prototype.hasOwnProperty.call(KINDS, t) ? KINDS[t] : null;
+      const inner = document.querySelector('#splash .splash-inner');
+      let shown = null;
+      const paint = (k) => {
+        shown = k;
+        inner.querySelector('.splash-title').textContent = k[0];
+        inner.querySelector('.splash-subtitle').textContent = k[1];
+        const img = inner.querySelector('.splash-rings img');
+        img.src = 'icons/' + k[2];
+        img.style.height = k[2] === 'logo.svg' ? '104px' : '96px';
+        img.style.width = k[2] === 'logo.svg' ? '104px' : 'auto';
+      };
+      if (p.get('demo') === '1') { paint(kindOf(p.get('type')) || LOGO); window._splashDataAt = Date.now(); return; }
+      const key = 'inv_kind_' + (p.get('event') || 's:' + (p.get('s') || '').toLowerCase());
+      let saved = null;
+      try { saved = localStorage.getItem(key); } catch (e) {}
+      paint(kindOf(saved) || LOGO);
+      window.showInviteKind = function (t) {
+        window._splashDataAt = Date.now();
+        try { localStorage.setItem(key, t); } catch (e) {}
+        const k = kindOf(t);
+        if (!k || k === shown) return;
+        // Seen for a moment at least: the splash hider below waits for this.
+        window._splashKindAt = Date.now();
+        inner.style.transition = 'opacity 0.25s ease';
+        inner.style.opacity = '0';
+        setTimeout(() => { paint(k); inner.style.opacity = '1'; }, 250);
+      };
+    } catch (e) {}
+  })();
+  </script>
+  <script>
+  // Isolated on purpose, and NOT gated on window.load — if this lived
+  // inside the big application script below and something earlier in that
+  // script threw (a slow/failed CDN script, a bug, a bad connection), the
+  // splash would never get hidden and would block the real page forever.
+  // This one line is all this tiny script does, so nothing else on the
+  // page can prevent it from running.
+  // Hides once the event's data has arrived, at least 1.6 seconds after the
+  // start (the entrance animation), and 1.2 seconds after its own picture faded
+  // in; never later than 3.5 seconds in all (data that never arrives included).
+  const splashStart = Date.now();
+  setTimeout(function hideSplash() {
+    const now = Date.now();
+    const elapsed = now - splashStart;
+    if (elapsed < 3500) {
+      const wait = window._splashDataAt
+        ? Math.max(1600 - elapsed, (window._splashKindAt || 0) + 1200 - now)
+        : 200;
+      if (wait > 0) { setTimeout(hideSplash, Math.min(wait, 3500 - elapsed)); return; }
+    }
+    const splash = document.getElementById('splash');
+    if (splash) splash.classList.add('hide');
+  }, 100);
+  </script>
+
+  <main class="card card-wait" id="card">
+    <div id="loading">جاري التحميل...</div>
+  </main>
+
+<script src="icons.js"></script>
+<script src="utils.js"></script>
+<script src="format.js"></script>
+<script src="supabase-config.js"></script>
+<script src="vendor/supabase.min.js"></script>
+<script src="data.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+// ?event=<id> is the original link; ?s=<name> comes from a readable link like
+// da3wt.com/hala-turki (404.html forwards it here) and is looked up in
+// the slugs table (Data.invite.resolveSlug) in init().
+let eventId = params.get('event');
+const slugParam = (params.get('s') || '').toLowerCase();
+const card = document.getElementById('card');
+// While the event is loading the card holds a tall placeholder so the page
+// doesn't jump when the real content arrives (layout shift); once the loading
+// line is replaced, the reserved height is released.
+new MutationObserver(function (_m, obs) {
+  if (!document.getElementById('loading')) { card.classList.remove('card-wait'); obs.disconnect(); }
+}).observe(card, { childList: true });
+// ?demo=1 — a sample invitation for prospective customers, opened from the
+// landing page. It is the real invitation page with a made-up event: nothing
+// is read from or written to the database, so it can't be spammed and never
+// touches a real event.
+//
+// Opening it with no ?type= asks which kind of event the visitor is planning;
+// each kind is a different made-up event (name, place, colours, splash), so
+// someone planning a graduation sees a graduation invitation, not a wedding
+// one. ?type= can also be linked to directly (e.g. sent to a school).
+const isDemo = params.get('demo') === '1';
+const DEMO_KINDS = {
+  wedding:    { label: 'زفاف',   name: 'حفل زفاف أحمد وسارة',      venue: 'قاعة الأفراح — الرياض',        theme: 'gold' },
+  graduation: { label: 'تخرج',   name: 'حفل تخرج دفعة 2026',       venue: 'مدرسة الأمل الأهلية — الدمام', theme: 'sapphire' },
+  event:      { label: 'فعالية', name: 'ملتقى ريادة الأعمال 2026', venue: 'مركز المؤتمرات — الرياض',      theme: 'emerald' },
+};
+// hasOwnProperty, so ?type=constructor and the like can't pick up inherited keys.
+const demoKind = Object.prototype.hasOwnProperty.call(DEMO_KINDS, params.get('type')) ? params.get('type') : null;
+const DEMO_EVENT = demoKind ? {
+  name: DEMO_KINDS[demoKind].name,
+  date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+  venue: DEMO_KINDS[demoKind].venue,
+  theme: DEMO_KINDS[demoKind].theme,
+  type: demoKind,
+} : null;
+// localStorage can throw (Safari private browsing, or a browser policy
+// blocking storage entirely) — this runs as the very first thing in this
+// script, so an uncaught throw here would silently kill everything below
+// it, including init() itself never getting defined or called. The guest
+// would be stuck on the loading placeholder forever with no way out — the
+// exact "trapped" failure class already fixed elsewhere on this page.
+let myReqId = null;
+try { myReqId = localStorage.getItem('inv_reqid_' + eventId) || null; } catch (e) {}
+
+// Maps link + live countdown to the event date, shown above the RSVP form
+// and again once the guest is approved. Time defaults to 8pm Riyadh time —
+// there's no per-event time field, so this matches the typical reception hour.
+function eventInfoHtml(eventData) {
+  // Only a web address becomes a link: a javascript: or data: URL the organizer
+  // (or anyone editing the event) saved must never be tappable by a guest.
+  const mapsBtn = /^https?:\/\//i.test(String(eventData.mapsLink || '').trim())
+    ? `<a class="maps-link" href="${escapeHtml(String(eventData.mapsLink).trim())}" target="_blank" rel="noopener noreferrer">${ic('map-pin', 16)} موقع القاعة على الخريطة</a>`
+    : '';
+  const countdown = eventData.date ? `<div class="countdown" id="countdown"></div>` : '';
+  return mapsBtn + countdown;
+}
+
+// Re-renders (the RSVP status listener can re-fire) replace #countdown's
+// markup wholesale, so the previous interval must be cleared explicitly —
+// otherwise it keeps ticking against a detached element forever.
+let countdownTimer = null;
+
+function startCountdown(eventData) {
+  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+  const el = document.getElementById('countdown');
+  if (!el || !eventData.date) return;
+  const target = new Date(eventData.date + 'T20:00:00+03:00').getTime();
+  if (isNaN(target)) return;
+  function tick() {
+    const diff = target - Date.now();
+    if (diff <= 0) {
+      // The event day only (until 8pm the next day); after that, no countdown at all.
+      if (diff > -86400000) el.textContent = '🎉 وصل الموعد 🎉';
+      else el.style.display = 'none';
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const parts = [];
+    if (d > 0) parts.push(d + ' ' + arPlural(d, 'يوم', 'يومين', 'أيام'));
+    parts.push(h + ' ' + arPlural(h, 'ساعة', 'ساعتين', 'ساعات'));
+    parts.push(m + ' ' + arPlural(m, 'دقيقة', 'دقيقتين', 'دقائق'));
+    el.textContent = 'باقي ' + parts.join(' و ');
+  }
+  tick();
+  countdownTimer = setInterval(tick, 30000);
+}
+
+// The tap-to-retry messages (role="button") also answer Enter / Space.
+document.addEventListener('keydown', (e) => {
+  const t = e.target;
+  if ((e.key === 'Enter' || e.key === ' ') && t && t.getAttribute && t.getAttribute('role') === 'button') { e.preventDefault(); t.click(); }
+});
+
+function renderForm(eventData) {
+  card.innerHTML = `
+    <div class="ornament">✦</div>
+    <div class="inv-kind">${escapeHtml(EVENT_TYPES[eventTypeOf(eventData)].title)}</div>
+    <h1>${escapeHtml(eventData.name)}</h1>
+    <div class="sub">${[formatEventDate(eventData.date), eventData.venue].filter(Boolean).map(escapeHtml).join(' · ')}</div>
+    ${eventInfoHtml(eventData)}
+    <div class="inv-msg">${escapeHtml(welcomeOf(eventData))}</div>
+    <div class="gold-line"></div>
+    <input type="text" id="g-name" placeholder="الاسم الكامل" maxlength="100" autocomplete="name" aria-label="الاسم الكامل" enterkeyhint="send" onkeydown="if(event.key==='Enter') submitRequest()">
+    <button class="btn" id="rsvp-btn" onclick="submitRequest()">تأكيد الحضور</button>
+    <div class="form-msg" id="rsvp-msg" role="alert"></div>
+    <div class="rsvp-note"><span>ℹ️</span><span>بعد تأكيد حضورك، تتم مراجعة طلبك من ${escapeHtml(EVENT_TYPES[eventTypeOf(eventData)].approver)}. بعد الموافقة تظهر لك <b>بطاقة الدخول (الباركود)</b> هنا في نفس الرابط.</span></div>
+  `;
+  startCountdown(eventData);
+}
+
+// 128 random bits from the browser's secure generator. It's the guest's only
+// key to their own request (and to the barcode card that appears on it), so
+// it has to be unguessable — Math.random() is not.
+function newReqId() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return 'REQ-' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+function renderDemoChooser() {
+  card.innerHTML = `
+    <div class="ornament">✦</div>
+    <h1>جرّب دعوتك</h1>
+    <div class="sub">اختر نوع مناسبتك لتشوف كيف تطلع دعوتها</div>
+    <div class="gold-line"></div>
+    ${Object.entries(DEMO_KINDS).map(([k, v]) => `<a class="btn kind-btn" href="?demo=1&type=${k}"><img class="kind-ico" src="icons/kind-${k}.svg" alt="">${v.label}</a>`).join('')}
+  `;
+}
+
+function startDemo() {
+  const link = 'color:#1a1400; font-weight:700; text-decoration:underline; white-space:nowrap;';
+  document.body.insertAdjacentHTML('afterbegin',
+    '<div id="demo-banner" style="position:fixed; top:0; left:0; right:0; z-index:50; text-align:center; padding:10px 14px; font-size:13px; line-height:1.7; color:#1a1400; background:linear-gradient(135deg,#C99B4A,#E0BC7A,#F3E0BC);">' +
+    '👀 هذا نموذج تجريبي' + (demoKind ? ' لدعوة ' + DEMO_KINDS[demoKind].label : '') + ' — ما يُحفظ فيه أي شي. ' +
+    (demoKind ? '<a href="?demo=1" style="' + link + '">غيّر النوع</a> · ' : '') +
+    '<a href="app.html" style="' + link + '">أنشئ دعوتك أنت</a></div>');
+  if (!demoKind) { renderDemoChooser(); return; }
+  currentEvent = DEMO_EVENT;
+  document.body.setAttribute('data-theme', DEMO_EVENT.theme);
+  renderForm(DEMO_EVENT);
+}
+
+let submitting = false;
+let submitReq = null;
+
+function setFormMsg(text, info) {
+  const el = document.getElementById('rsvp-msg');
+  if (!el) return;
+  el.textContent = text || '';
+  el.className = 'form-msg' + (info ? ' info' : '');
+}
+
+async function submitRequest() {
+  if (submitting) return;
+  const input = document.getElementById('g-name');
+  const name = input.value.trim();
+  if (!name) { setFormMsg('اكتب اسمك'); input.focus(); return; }
+  setFormMsg('');
+  if (isDemo) {
+    // Show what the guest goes through, without a request being created: the
+    // waiting screen, then the card the organizer's approval would produce.
+    renderPending(name);
+    card.insertAdjacentHTML('beforeend',
+      '<div style="margin-top:14px; font-size:12px; color:#8a857a; line-height:1.7;">في الدعوة الحقيقية يوافق المنظّم على طلبك — هنا نوافق تلقائيًا عشان تشوف الشكل النهائي</div>');
+    setTimeout(() => renderApproved(DEMO_EVENT, { name, id: 'WD-DEMO2026A' }), 1800);
+    return;
+  }
+  // A failed send may still have reached the server: retrying with the same
+  // id (and name) cannot create a second request.
+  if (!submitReq || submitReq.name !== name) submitReq = { id: newReqId(), name };
+  const reqId = submitReq.id;
+  const btn = document.getElementById('rsvp-btn');
+  submitting = true;
+  btn.disabled = true;
+  btn.textContent = 'جاري الإرسال...';
+  // A slow connection can take a while to confirm the write; say so instead of
+  // letting the guest think nothing happened and tap again.
+  const slowTimer = setTimeout(() => setFormMsg('طلبك لسا يُرسل، تأكد من الإنترنت وانتظر لحظات', true), 8000);
+  try {
+    // The request id is chosen here and is the guest's only key to it.
+    await Data.invite.submitRequest(eventId, reqId, name);
+  } catch (e) {
+    clearTimeout(slowTimer);
+    console.error(e);
+    submitting = false;
+    btn.disabled = false;
+    btn.textContent = 'تأكيد الحضور';
+    // The owner's queue of pending requests is at its limit: retrying cannot help, so say who to ask.
+    setFormMsg(e && e.code === 'requests-full' ? 'قائمة التسجيل ممتلئة حاليًا. تواصل مع صاحب الدعوة.' : 'تعذّر إرسال طلبك، جرّب مرة ثانية');
+    return;
+  }
+  clearTimeout(slowTimer);
+  submitting = false;
+  submitReq = null;
+  // The request was already saved above — an unguarded
+  // throw here would leave the guest stuck without their pending-status
+  // screen even though their RSVP went through, likely making them think
+  // it failed and re-submit.
+  try { localStorage.setItem('inv_reqid_' + eventId, reqId); } catch (e) {}
+  myReqId = reqId;
+  watchStatus();
+}
+
+function renderPending(name) {
+  card.innerHTML = `
+    <div class="status-icon">⏳</div>
+    ${name ? `<div class="guest-name">${escapeHtml(name)}</div>` : ''}
+    <div class="status-msg">تم إرسال طلبك ✅<br>بانتظار موافقة ${escapeHtml(EVENT_TYPES[eventTypeOf(currentEvent)].approver)}</div>
+    <div class="pend-note">بعد الموافقة تظهر بطاقة دخولك (الباركود) هنا.<br>افتح نفس الرابط <b>بنفس الطريقة (من نفس الجوال ونفس المتصفح)</b> للرجوع لها.</div>
+  `;
+}
+
+function renderRejected() {
+  card.innerHTML = `
+    <div class="status-icon">😕</div>
+    <div class="status-msg">للأسف ما قدرنا نؤكد حضورك حاليًا</div>
+    <button class="btn" style="margin-top:18px;" onclick="retryRequest()">حاول مرة ثانية</button>
+  `;
+}
+
+function retryRequest() {
+  shownKey = null;
+  if (statusWatch) { statusWatch.stop(); statusWatch = null; }
+  try { localStorage.removeItem('inv_reqid_' + eventId); } catch (e) {}
+  myReqId = null;
+  renderForm(currentEvent);
+}
+
+function hexToRgba(hex, alpha) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+function drawSparkle(ctx, x, y, size, color) {
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(x, y - size);
+  ctx.lineTo(x + size * 0.28, y - size * 0.28);
+  ctx.lineTo(x + size, y);
+  ctx.lineTo(x + size * 0.28, y + size * 0.28);
+  ctx.lineTo(x, y + size);
+  ctx.lineTo(x - size * 0.28, y + size * 0.28);
+  ctx.lineTo(x - size, y);
+  ctx.lineTo(x - size * 0.28, y - size * 0.28);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawFadedLine(ctx, x1, x2, y, color) {
+  const g = ctx.createLinearGradient(x1, y, x2, y);
+  g.addColorStop(0, 'rgba(0,0,0,0)');
+  g.addColorStop(0.5, color);
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.strokeStyle = g;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x1, y); ctx.lineTo(x2, y);
+  ctx.stroke();
+}
+
+// Draws the same polished printable card the organizer's dashboard uses —
+// canvas-based so it renders identically everywhere, and produces a real
+// <img> (via toDataURL) that iOS/Android "save image" actually works on,
+// unlike a bare <canvas> which most mobile browsers won't let you save.
+const THEME_COLORS = {
+  gold:     { accent: '#C9A84C', accentLight: '#E0BC7A' },
+  rose:     { accent: '#C9879A', accentLight: '#E8B4B8' },
+  emerald:  { accent: '#2E7D5A', accentLight: '#D4AF7F' },
+  sapphire: { accent: '#5A6FA0', accentLight: '#8A9DC9' },
+  ivory:    { accent: '#9C7A45', accentLight: '#B08D57' }
+};
+
+// qrcodejs is only needed once a request is approved, so it is fetched then
+// rather than blocking every visit. It is served from our own origin first and
+// the CDN is only the fallback; rejects if both fail, so the caller can show a
+// retry instead of a blank card.
+// Keep this loader identical in invite.html and event.html
+const QR_LOCAL_URL = '/vendor/qrcode.min.js?v=1';
+const QR_CDN_URL = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+const QR_LOCAL_MS = 8000;
+const QR_CDN_MS = 15000;
+function qrReady() {
+  return typeof window.QRCode === 'function' && !!window.QRCode.CorrectLevel;
+}
+// One attempt: resolves only when a working QRCode exists; any failure (error,
+// timeout, a 200 that is not the library) removes the script and rejects.
+function tryQrScript(url, ms) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    let settled = false;
+    const end = (ok) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (ok) return resolve();
+      s.remove();
+      reject(new Error('qrcode'));
+    };
+    const timer = setTimeout(() => end(false), ms);
+    s.onload = () => {
+      let tries = 0;
+      (function check() {
+        if (settled) return;
+        if (qrReady()) return end(true);
+        if (++tries > 40) return end(false);
+        setTimeout(check, 50);
+      })();
+    };
+    s.onerror = () => end(false);
+    s.async = true;
+    s.src = url;
+    document.head.appendChild(s);
+  });
+}
+let qrLibPromise = null;
+function loadQrLib() {
+  if (qrReady()) return Promise.resolve();
+  if (!qrLibPromise) {
+    const p = tryQrScript(QR_LOCAL_URL, QR_LOCAL_MS).catch(() => tryQrScript(QR_CDN_URL, QR_CDN_MS));
+    qrLibPromise = p;
+    p.catch(() => { if (qrLibPromise === p) qrLibPromise = null; });
+  }
+  return qrLibPromise;
+}
+
+// Draws one centred line that always fits maxW: the font shrinks a few pixels
+// at a time down to minSize, and fillText's own maxWidth squeezes what is left.
+// Returns the size used.
+function fitFillText(ctx, text, x, y, maxW, size, minSize, fontOf) {
+  text = String(text || '');
+  let px = size;
+  ctx.font = fontOf(px);
+  while (px > minSize && ctx.measureText(text).width > maxW) { px -= 2; ctx.font = fontOf(px); }
+  ctx.fillText(text, x, y, maxW);
+  return px;
+}
+
+// The canvas can't wait for web fonts by itself: drawn too early it uses the
+// fallback font. Ask for the weights the card uses, with the real texts so the
+// right unicode-range file loads, but never hold the guest more than 1.5 s.
+function loadCardFonts(texts) {
+  return new Promise((resolve) => {
+    const timer = setTimeout(resolve, 1500);
+    try {
+      if (!document.fonts || !document.fonts.load) { clearTimeout(timer); resolve(); return; }
+      const t = texts.filter(Boolean).join(' ');
+      Promise.all([
+        document.fonts.load('400 34px "IBM Plex Sans Arabic"', t),
+        document.fonts.load('700 54px "IBM Plex Sans Arabic"', t),
+        document.fonts.load('700 38px "Playfair Display"', t)
+      ]).then(() => { clearTimeout(timer); resolve(); }, () => { clearTimeout(timer); resolve(); });
+    } catch (e) { clearTimeout(timer); resolve(); }
+  });
+}
+
+function buildInviteCard(eventData, guest) {
+  return new Promise((resolve) => {
+    if (!qrReady()) { resolve(null); return; }
+    const themeColors = THEME_COLORS[eventData.theme || 'gold'] || THEME_COLORS.gold;
+    const GOLD = themeColors.accent;
+    const GOLD_LIGHT = themeColors.accentLight;
+
+    const tmp = document.createElement('div');
+    tmp.style.cssText = 'position:fixed;left:-9999px;top:-9999px;background:white;padding:12px;';
+    document.body.appendChild(tmp);
+
+    new QRCode(tmp, {
+      text: guest.id, width: 400, height: 400,
+      colorDark: '#0A0A0A', colorLight: '#FAFAF8',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // qrcodejs creates the <canvas> element up front but can (rarely, e.g.
+    // when several cards render back to back) leave it painted a moment
+    // later — checking the element exists isn't enough, it can still be a
+    // blank canvas filled with just the background color. Sample a grid of
+    // pixels for any actual dark (QR) ink before accepting it.
+    function qrCanvasHasContent(canvas) {
+      try {
+        const c2 = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        const data = c2.getImageData(0, 0, w, h).data;
+        for (let y = 0; y < h; y += 8) {
+          for (let x = 0; x < w; x += 8) {
+            if (data[(y * w + x) * 4] < 128) return true;
+          }
+        }
+        return false;
+      } catch (e) {
+        return true; // can't inspect (e.g. tainted canvas) — trust it exists
+      }
+    }
+
+    function waitForQr(retriesLeft) {
+      const qr = tmp.querySelector('canvas');
+      if (qr && qrCanvasHasContent(qr)) return Promise.resolve(qr);
+      if (retriesLeft <= 0) return Promise.resolve(qr || null);
+      return new Promise(r => setTimeout(r, 100)).then(() => waitForQr(retriesLeft - 1));
+    }
+
+    waitForQr(30).then((qr) => new Promise(r => setTimeout(() => r(qr), 80))).then((qr) =>
+      loadCardFonts([eventData.name, guest.name, eventData.venue, 'هذا الباركود لشخص واحد فقط احتفظ بهذا الباركود للدخول وإبرازه عند البوابة', '★ VIP']).then(() => qr)
+    ).then((qr) => {
+      if (!qr) { document.body.removeChild(tmp); resolve(null); return; }
+
+      // Some browsers (notably Firefox, as an anti-fingerprinting measure)
+      // silently blank out pixels drawn via ctx.drawImage(sourceCanvas, ...)
+      // without throwing. Converting the QR canvas to a data URL and loading
+      // it into a plain <img> first avoids that canvas-to-canvas copy path.
+      const qrDataUrl = qr.toDataURL('image/png');
+      const qrImg = new Image();
+      qrImg.onload = () => buildCardWithQr(qrImg);
+      qrImg.onerror = () => buildCardWithQr(qr);
+      qrImg.src = qrDataUrl;
+    });
+
+    function buildCardWithQr(qr) {
+      const c = document.createElement('canvas');
+      c.width = 1000; c.height = 1400;
+      const ctx = c.getContext('2d');
+
+      const vip = !!guest.vip;
+      const dy = vip ? 56 : 0;
+      ctx.fillStyle = vip ? '#0E0C08' : '#FAFAF8';
+      ctx.fillRect(0, 0, 1000, 1400);
+
+      const glow = ctx.createRadialGradient(500, 530, 60, 500, 530, 520);
+      glow.addColorStop(0, hexToRgba(GOLD, 0.10));
+      glow.addColorStop(1, hexToRgba(GOLD, 0));
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 150, 1000, 800);
+
+      ctx.fillStyle = GOLD;
+      ctx.fillRect(0, 0, 1000, 22);
+      ctx.fillRect(0, 1378, 1000, 22);
+      ctx.fillRect(0, 0, 6, 1400);
+      ctx.fillRect(994, 0, 6, 1400);
+
+      ctx.strokeStyle = hexToRgba(GOLD, 0.35);
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(42, 42, 916, 1316);
+      if (vip) {
+        ctx.strokeStyle = GOLD;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(30, 30, 940, 1340);
+      }
+
+      const titleGrad = ctx.createLinearGradient(300, 0, 700, 0);
+      titleGrad.addColorStop(0, GOLD);
+      titleGrad.addColorStop(0.5, GOLD_LIGHT);
+      titleGrad.addColorStop(1, GOLD);
+      ctx.fillStyle = titleGrad;
+      ctx.textAlign = 'center';
+      fitFillText(ctx, eventData.name, 500, 118, 860, 58, 30, (px) => 'bold ' + px + 'px "IBM Plex Sans Arabic", Arial');
+
+      ctx.fillStyle = vip ? '#B8B4AC' : '#999';
+      ctx.font = '34px "IBM Plex Sans Arabic", Arial';
+      ctx.fillText(formatEventDate(eventData.date), 500, 172);
+
+      if (vip) {
+        const bw = 170, bh = 48, bx = 500 - bw / 2, by = 196;
+        const badge = ctx.createLinearGradient(bx, 0, bx + bw, 0);
+        badge.addColorStop(0, GOLD);
+        badge.addColorStop(0.5, GOLD_LIGHT);
+        badge.addColorStop(1, GOLD);
+        ctx.fillStyle = badge;
+        ctx.beginPath();
+        ctx.moveTo(bx + bh / 2, by);
+        ctx.arcTo(bx + bw, by, bx + bw, by + bh, bh / 2);
+        ctx.arcTo(bx + bw, by + bh, bx, by + bh, bh / 2);
+        ctx.arcTo(bx, by + bh, bx, by, bh / 2);
+        ctx.arcTo(bx, by, bx + bw, by, bh / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#1a1400';
+        ctx.font = 'bold 30px "Playfair Display", Arial';
+        ctx.fillText('★ VIP', 500, by + 35);
+      }
+
+      drawFadedLine(ctx, 280, 720, 205 + dy, GOLD);
+
+      const qx = 180, qy = 232 + dy, qw = 640, qh = 640, rr = 28;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(qx + rr, qy);
+      ctx.arcTo(qx + qw, qy, qx + qw, qy + qh, rr);
+      ctx.arcTo(qx + qw, qy + qh, qx, qy + qh, rr);
+      ctx.arcTo(qx, qy + qh, qx, qy, rr);
+      ctx.arcTo(qx, qy, qx + qw, qy, rr);
+      ctx.closePath();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.shadowColor = 'rgba(0,0,0,0.10)';
+      ctx.shadowBlur = 24;
+      ctx.shadowOffsetY = 6;
+      ctx.fill();
+      ctx.restore();
+      ctx.strokeStyle = hexToRgba(GOLD, 0.5);
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.drawImage(qr, 220, 272 + dy, 560, 560);
+
+      ctx.fillStyle = vip ? GOLD_LIGHT : '#0A0A0A';
+      fitFillText(ctx, guest.name, 500, 940 + dy, 860, 54, 28, (px) => 'bold ' + px + 'px "IBM Plex Sans Arabic", Arial');
+
+      ctx.fillStyle = '#B0AAA0';
+      ctx.font = '28px "Playfair Display", Arial';
+      ctx.fillText(guest.id, 500, 992 + dy);
+
+      drawFadedLine(ctx, 220, 780, 1028 + dy, vip ? hexToRgba(GOLD, 0.5) : 'rgba(0,0,0,0.18)');
+
+      if (eventData.venue) {
+        ctx.fillStyle = GOLD;
+        fitFillText(ctx, eventData.venue, 500, 1088 + dy, 860, 38, 22, (px) => 'bold ' + px + 'px "Playfair Display", "IBM Plex Sans Arabic", Arial');
+        ctx.strokeStyle = hexToRgba(GOLD, 0.55);
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(300, 1076 + dy); ctx.lineTo(360, 1076 + dy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(640, 1076 + dy); ctx.lineTo(700, 1076 + dy); ctx.stroke();
+      }
+
+      ctx.fillStyle = vip ? '#B8B4AC' : '#888';
+      ctx.font = '26px "IBM Plex Sans Arabic", Arial';
+      ctx.fillText('هذا الباركود لشخص واحد فقط', 500, 1148 + dy);
+      ctx.fillStyle = vip ? '#8a857a' : '#666';
+      ctx.font = '24px "IBM Plex Sans Arabic", Arial';
+      ctx.fillText('احتفظ بهذا الباركود للدخول وإبرازه عند البوابة', 500, 1200 + dy);
+
+      drawSparkle(ctx, 92, 92, 16, GOLD);
+      drawSparkle(ctx, 908, 92, 16, GOLD);
+      drawSparkle(ctx, 92, 1308, 16, GOLD);
+      drawSparkle(ctx, 908, 1308, 16, GOLD);
+
+      document.body.removeChild(tmp);
+      resolve(c);
+    }
+  });
+}
+
+let cardCanvas = null;
+let cardGuestName = '';
+
+async function downloadInviteCard() {
+  if (!cardCanvas) return;
+  const safeName = String(cardGuestName).trim().replace(/[\s\/\\:*?"<>|]+/g, '_');
+  const fileName = 'Invitation-' + safeName + '.png';
+
+  cardCanvas.toBlob(async (blob) => {
+    if (!blob) return;
+    try {
+      const file = new File([blob], fileName, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: cardGuestName });
+        return;
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+    }
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    // In-app browsers ignore the download: tell the guest the manual way.
+    const hint = document.getElementById('press-hint');
+    if (hint) hint.style.display = 'block';
+  }, 'image/png');
+}
+
+let cardSeq = 0;
+
+async function renderApproved(eventData, guest) {
+  const mySeq = ++cardSeq;
+  // The demo can't simulate the door camera itself — only the card a real
+  // guest would end up with — so a visitor could otherwise assume that's
+  // the whole product and miss that scanning happens for real at the door.
+  const demoScanNote = isDemo
+    ? '<div style="margin-top:12px; font-size:12px; color:#8a857a; line-height:1.7;">هذه معاينة لتجربة ضيفك. مسح الكود عند الباب يتم لحظياً عبر كاميرا جوال المشرف بدون الحاجة لتطبيقات.</div>'
+    : '';
+  card.innerHTML = `
+    <div class="status-icon">🎉</div>
+    <div class="status-msg">تم تأكيد حضورك!</div>
+    ${eventInfoHtml(eventData)}
+    <div id="card-wrap" style="margin-top:16px;"></div>
+    <div class="help-line" id="press-hint" style="display:none;">إذا ما نزلت الصورة، اضغط مطولًا عليها واختر حفظ</div>
+    <button class="btn" id="save-btn" style="margin-top:14px; display:none;" onclick="downloadInviteCard()">${ic('download', 16)} حفظ الدعوة</button>
+    <div class="help-line" id="save-hint" style="display:none;">احفظ الدعوة أو صوّر الشاشة</div>
+    ${demoScanNote}
+  `;
+  startCountdown(eventData);
+  const wrap = document.getElementById('card-wrap');
+  async function drawCard() {
+    wrap.innerHTML = '<div id="qr-loading" style="text-align:center; color:#8a857a; font-size:13px;">جاري تجهيز بطاقتك...</div>';
+    let built = null;
+    try { await loadQrLib(); built = await buildInviteCard(eventData, guest); } catch (e) { built = null; }
+    if (mySeq !== cardSeq || !document.body.contains(wrap)) return;
+    if (!built) {
+      wrap.innerHTML = '<div class="status-msg" id="qr-retry" role="button" tabindex="0" style="cursor:pointer">⚠️ تعذّر تجهيز البطاقة بسبب ضعف الإنترنت — اضغط هنا للمحاولة مرة ثانية</div>';
+      document.getElementById('qr-retry').onclick = drawCard;
+      return;
+    }
+    cardCanvas = built;
+    cardGuestName = guest.name;
+    const img = document.createElement('img');
+    img.src = built.toDataURL('image/png');
+    img.style.cssText = 'width:100%; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,0.4);';
+    wrap.innerHTML = '';
+    wrap.appendChild(img);
+    document.getElementById('save-btn').style.display = 'block';
+    document.getElementById('save-hint').style.display = 'block';
+  }
+  await drawCard();
+}
+
+let currentEvent = null;
+
+function renderPreparing() {
+  card.innerHTML = `
+    <div class="status-icon">🎉</div>
+    <div class="status-msg">تمت الموافقة على حضورك! جاري تجهيز بطاقتك — بتظهر هنا خلال لحظات</div>
+  `;
+}
+
+let renderedGuestId = null;
+let statusWatch = null;
+
+// The guest's page asks about ONE request by its secret id (get_request);
+// it cannot list requests. One guest can't ask for another's request because
+// the id is 128 random bits they never see.
+let reqShown = false;
+let shownKey = null;
+let checkTimer = null;
+
+function clearCheckTimer() { if (checkTimer) { clearTimeout(checkTimer); checkTimer = null; } }
+
+function renderChecking() {
+  shownKey = null;
+  renderedGuestId = null;
+  if (document.getElementById('checking')) return;
+  card.innerHTML = '<div class="status-msg" id="checking">جاري التحقق من طلبك... تأكد من اتصال الإنترنت</div>';
+  clearCheckTimer();
+  // Still nothing from the server after a while: let the guest re-run the check.
+  checkTimer = setTimeout(() => {
+    checkTimer = null;
+    const el = document.getElementById('checking');
+    if (el) el.insertAdjacentHTML('afterend', '<button class="btn" id="check-retry" style="margin-top:18px;" onclick="watchStatus()">إعادة المحاولة</button>');
+  }, 12000);
+}
+
+function renderReqError() {
+  shownKey = null;
+  renderedGuestId = null;
+  clearCheckTimer();
+  card.innerHTML = `
+    <div class="status-icon">⚠️</div>
+    <div class="status-msg">تعذّر تحميل طلبك، تأكد من الإنترنت</div>
+    <button class="btn" style="margin-top:18px;" onclick="watchStatus()">حاول مرة ثانية</button>
+  `;
+}
+
+function watchStatus() {
+  if (statusWatch) { statusWatch.stop(); statusWatch = null; }
+  clearCheckTimer();
+  shownKey = null;
+  // Called from a retry button: say we are checking. The first call (from
+  // init) keeps the loading line that is already on screen.
+  if (!document.getElementById('loading')) renderChecking();
+  statusWatch = Data.invite.watchRequest(eventId, myReqId, {
+    onChange(req) {
+      if (!req) {
+        clearCheckTimer();
+        // Nothing under this id: a request the organizer deleted. There's
+        // nothing to wait for — let the guest register again.
+        renderedGuestId = null;
+        retryRequest();
+        setFormMsg('تم حذف طلبك من صاحب الدعوة، تقدر تسجّل من جديد');
+        return;
+      }
+      reqShown = true;
+      clearCheckTimer();
+      const key = req.status + '|' + (req.guestId || '') + '|' + (req.name || '') + '|' + (req.vip ? 1 : 0);
+      if (key === shownKey) return;
+      shownKey = key;
+      if (req.status === 'pending') { renderedGuestId = null; renderPending(req.name); }
+      else if (req.status === 'rejected') { renderedGuestId = null; renderRejected(); }
+      else if (req.status === 'approved') {
+        // The barcode id is copied onto the request when the organizer
+        // approves it. The card is drawn from the request alone: the guest
+        // list is not readable here, so a guest the organizer deleted
+        // afterwards still shows their card (the door refuses it).
+        if (!req.guestId) { renderedGuestId = null; renderPreparing(); return; }
+        const cardKey = req.guestId + '|' + (req.vip ? 1 : 0);
+        if (renderedGuestId === cardKey) return;
+        renderedGuestId = cardKey;
+        renderApproved(currentEvent, { name: req.name, id: req.guestId, vip: !!req.vip });
+      }
+    },
+    onError(e) {
+      // A failed check is not a deleted request: keep the saved key.
+      console.error(e);
+      // Something is already on screen (a card, the waiting note): keep it,
+      // the next check retries by itself.
+      if (shownKey !== null) return;
+      renderReqError();
+    }
+  });
+}
+
+const CHECK_LINK = 'تأكد من الرابط أو تواصل مع صاحب الدعوة';
+// Event ids are letters and digits (app.html's newEventId), never a slash or a
+// dot, which doc() would reject. Short ids are allowed: older events had them.
+function validEventId(id) { return /^[A-Za-z0-9_-]{1,100}$/.test(String(id || '')); }
+function showBadLink() {
+  card.innerHTML = '<div class="status-msg">⚠️ رابط غير صحيح</div><div class="help-line">' + CHECK_LINK + '</div>';
+}
+
+async function init() {
+  if (!eventId && slugParam) {
+    try {
+      const id = await Data.invite.resolveSlug(slugParam);
+      if (!id) { card.innerHTML = '<div class="status-msg">⚠️ هذا الرابط غير موجود</div><div class="help-line">' + CHECK_LINK + '</div>'; return; }
+      eventId = id;
+      if (!validEventId(eventId)) { showBadLink(); return; }
+      try { myReqId = localStorage.getItem('inv_reqid_' + eventId) || null; } catch (e) {}
+      // Keep the readable link in the address bar (a reload goes through 404.html again).
+      try { history.replaceState(null, '', '/' + slugParam); } catch (e) {}
+    } catch (e) {
+      console.error(e);
+      card.innerHTML = '<div class="status-msg" id="retry-msg" role="button" tabindex="0" style="cursor:pointer">⚠️ تعذّر الاتصال — اضغط هنا للمحاولة مرة ثانية</div>';
+      document.getElementById('retry-msg').onclick = init;
+      return;
+    }
+  }
+  if (!validEventId(eventId)) { showBadLink(); return; }
+  let ev;
+  try {
+    ev = await Data.invite.event(eventId);
+  } catch (e) {
+    // Same "trapped forever" failure the splash fix closed, one layer
+    // deeper: a dropped connection here used to leave a guest stuck on
+    // "جاري التحميل..." forever with no way to actually RSVP.
+    console.error(e);
+    card.innerHTML = '<div class="status-msg" id="retry-msg" role="button" tabindex="0" style="cursor:pointer">⚠️ تعذّر الاتصال — اضغط هنا للمحاولة مرة ثانية</div>';
+    document.getElementById('retry-msg').onclick = init;
+    return;
+  }
+  if (!ev) { card.innerHTML = '<div class="status-msg">⚠️ هذه المناسبة غير موجودة</div><div class="help-line">' + CHECK_LINK + '</div>'; return; }
+  currentEvent = ev;
+  if (currentEvent.name) document.title = String(currentEvent.name).slice(0, 60) + ' | دعوات';
+  document.body.setAttribute('data-theme', currentEvent.theme || 'gold');
+  if (window.showInviteKind) window.showInviteKind(eventTypeOf(currentEvent));
+
+  if (myReqId) watchStatus();
+  else renderForm(currentEvent);
+}
+
+if (isDemo) {
+  startDemo();          // needs no database at all
+} else if (window.Data) {
+  init();
+} else {
+  // A script that did not load (the page's error banner also offers a reload)
+  // must not leave this stuck on "جاري التحميل..." forever with no way out.
+  const el = document.getElementById('loading');
+  el.textContent = '⚠️ تعذّر الاتصال — اضغط هنا للمحاولة مرة ثانية';
+  el.style.cursor = 'pointer';
+  el.onclick = () => location.reload();
+}
+</script>
+</body>
+</html>
