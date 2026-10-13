@@ -262,14 +262,17 @@
   // page is hidden and runs at once when the page returns. A failing fn
   // doubles the wait up to 60 s; the next success resets it. Each wait is
   // jittered by +-10% so many phones do not hit the server together.
-  function makePoller(fn, intervalMs) {
+  // opts.hiddenIntervalMs (off by default): keep polling at that slower rate while the page is hidden.
+  function makePoller(fn, intervalMs, opts) {
+    const hid = opts && opts.hiddenIntervalMs > 0 ? opts.hiddenIntervalMs : 0;
     let timer = null, delay = intervalMs, inflight = false, stopped = true, suspended = false, listening = false;
-    const active = () => !stopped && !suspended && !document.hidden;
+    const active = () => !stopped && !suspended && (!document.hidden || !!hid);
     const clear = () => { if (timer) { clearTimeout(timer); timer = null; } };
     function schedule() {
       clear();
       if (!active()) return;
-      timer = setTimeout(tick, delay * (0.9 + Math.random() * 0.2));
+      const base = document.hidden && hid ? Math.max(hid, delay) : delay;
+      timer = setTimeout(tick, base * (0.9 + Math.random() * 0.2));
     }
     async function tick() {
       timer = null;
@@ -287,7 +290,7 @@
       tick();
     }
     const onHide = () => { suspended = true; clear(); };
-    const onVis = () => { if (document.hidden) clear(); else wake(); };
+    const onVis = () => { if (document.hidden) { if (hid) schedule(); else clear(); } else wake(); };
     function listen(on) {
       if (on === listening) return;
       listening = on;
@@ -536,7 +539,8 @@
 
   const SCAN_COUNTER_MS = 4000;
   const SCAN_NAMES_MS = 10000;
-  const SCAN_FULL_MS = 60000;
+  const GHOST_GAP_MS = 10 * 60000;   // a counter that never adds up costs at most 6 full reads an hour
+  const SYNC_MAX_GAP_MS = 6 * 24 * 3600000;   // the server keeps deletions for 7 days: after a longer silence read everything
   const GUEST_PAGE = 1000;       // the server caps a response at 1000 rows
   const CURSOR_MARGIN_MS = 60000;  // commit order vs changed_at, see supabase/README.md
 
@@ -602,7 +606,10 @@
   function firstRow(d) { return Array.isArray(d) ? d[0] : d; }
 
   function guestRow(r) {
-    return { id: r.id, name: r.name, scanned: !!r.scanned, scannedAt: iso(r.scanned_at), vip: !!r.vip, changedAt: r.changed_at || '' };
+    if (r.deleted) return { id: r.id, deleted: true, changedAt: r.changed_at || '' };
+    const g = { id: r.id, name: r.name, scanned: !!r.scanned, scannedAt: iso(r.scanned_at), vip: !!r.vip, changedAt: r.changed_at || '' };
+    if (r.registered_at !== undefined) g.registeredAt = iso(r.registered_at);
+    return g;
   }
 
   // Every row of door_guests, paged until a page comes back short. since = null:
@@ -612,11 +619,14 @@
   // changed_at minus one minute (never earlier than since): pass it back as the
   // next since. A page can only miss a row committed more than a minute after
   // its changed_at.
-  async function scanGuests(eventId, sinceIso) {
+  function scanGuests(eventId, sinceIso) {
+    return readGuests((args) => scanRpc('door_guests', args), eventId, sinceIso);
+  }
+  async function readGuests(call, eventId, sinceIso) {
     const byId = new Map();
     let since = sinceIso || null, afterName = null, afterId = null;
     for (let pages = 0; pages < 500; pages++) {
-      const page = await scanRpc('door_guests', {
+      const page = await call({
         p_event_id: eventId, p_since: since, p_after_name: afterName, p_after_id: afterId, p_limit: GUEST_PAGE,
       });
       const list = Array.isArray(page) ? page : [];
@@ -676,9 +686,9 @@
     guests: scanGuests,
     // Live numbers and names. onCounter(event) every 4 s; the names are read
     // every 10 s but only when lastChange moved (as a delta from the cursor),
-    // plus a full read every 60 s (that is what notices deleted guests).
+    // (deleted guests come as rows with deleted: true; there is no timed full read).
     // Both pause while the page is hidden and run at once when it returns.
-    // opts.since = cursor of the list the page already shows (null = none),
+    // opts.count() = how many guests the page holds (for the ghost check), opts.since = cursor of the list the page already shows (null = none),
     // opts.lastChange = the lastChange that list matches (null = unknown, so
     // the first change check reads a delta). onGuests({ rows, cursor, full,
     // lastChange }); onError(err, 'counter' | 'names') for a failed poll (the poller backs off).
@@ -687,26 +697,35 @@
       let cursor = o.since || null;
       let seen = o.lastChange === undefined ? null : o.lastChange;
       let latest;
-      let lastFullAt = Date.now();
-      let stopped = false;
+      let lastOkAt = Date.now(), lastGhostAt = 0, mismatch = 0, latestCount;
+      let stopped = false, forceFull = false;
       const fail = (e, kind) => { if (!stopped && o.onError) o.onError(e, kind); throw e; };
       const counter = makePoller(async () => {
         let ev;
         try { ev = await scan.event(eventId); } catch (e) { fail(e, 'counter'); }
         if (stopped || !ev) return;
         latest = ev.lastChange;
+        latestCount = ev.guestCount;
         if (o.onCounter) o.onCounter(ev);
       }, SCAN_COUNTER_MS);
+      // Deleted guests arrive in the delta as tombstones, so the list is never re-downloaded on a timer. A full
+      // read happens only when forced (manual refresh), after a very long silence, or when the page's list size
+      // still differs from the server's guest count on two polls in a row (at most once per GHOST_GAP_MS).
       const names = makePoller(async () => {
-        const due = Date.now() - lastFullAt >= SCAN_FULL_MS;
-        if (!due && (latest === undefined || latest === seen)) return;
-        const full = due || !cursor;
+        const off = typeof o.count === 'function' && latestCount !== undefined && o.count() !== latestCount;
+        mismatch = off ? mismatch + 1 : 0;
+        const ghostDue = mismatch >= 2 && Date.now() - lastGhostAt >= GHOST_GAP_MS;
+        const stale = Date.now() - lastOkAt > SYNC_MAX_GAP_MS;
+        if (!forceFull && !stale && !ghostDue && (latest === undefined || latest === seen)) { lastOkAt = Date.now(); return; }
+        const full = forceFull || stale || ghostDue || !cursor;
         const at = latest;
         let res;
         try { res = await scanGuests(eventId, full ? null : cursor); } catch (e) { fail(e, 'names'); }
         if (stopped) return;
         cursor = res.cursor;
-        if (full) lastFullAt = Date.now();
+        if (ghostDue) { lastGhostAt = Date.now(); mismatch = 0; }
+        forceFull = false;
+        lastOkAt = Date.now();
         seen = at;
         if (o.onGuests) o.onGuests({ rows: res.rows, cursor: res.cursor, full: res.full, lastChange: at });
       }, SCAN_NAMES_MS);
@@ -714,10 +733,296 @@
       names.start();
       return {
         stop() { stopped = true; counter.stop(); names.stop(); },
-        refresh() { counter.refresh(); },
+        // { full: true } also reads the whole list again on the next names poll
+        refresh(r) { if (r && r.full) { forceFull = true; names.refresh(); } counter.refresh(); },
       };
     },
   };
 
-  window.Data = { DataError, normalizeError, ready, platform, client, camel, iso, makePoller, timedFetch, invite, auth, scan, events, account, admin };
+  // ---- Event dashboard (event.html) ---------------------------------------------
+  // Every call that changes something bumps `writes` before and after. The live
+  // poll remembers the counter it started with and throws its answer away when
+  // it moved, so a poll that read the server before the write can never put the
+  // old numbers back on screen.
+  let writes = 0, writing = 0;
+  let idleWaiters = [];
+  const watchers = new Set();
+  async function write(fn) {
+    writes++; writing++;
+    try { return await fn(); } finally {
+      writes++; writing--;
+      if (!writing) { const w = idleWaiters; idleWaiters = []; w.forEach((r) => r()); }
+    }
+  }
+  function writesDone() { return writing ? new Promise((r) => idleWaiters.push(r)) : Promise.resolve(); }
+  // a guest this page just deleted leaves the live list at once (a later delta cannot show a deletion)
+  function forgetGuests(eventId, ids) {
+    watchers.forEach((w) => { if (w.eventId === eventId) w.forget(ids); });
+  }
+
+  const NAME_MAX = 100;
+  // Names longer than 100 characters are cut (the server refuses them). Counts
+  // characters, not UTF-16 units, like the database does.
+  function cutName(name) {
+    const n = String(name == null ? '' : name).trim();
+    if (n.length <= NAME_MAX) return { name: n, cut: false };
+    const cps = Array.from(n);
+    return cps.length <= NAME_MAX ? { name: n, cut: false } : { name: cps.slice(0, NAME_MAX).join('').trim(), cut: true };
+  }
+
+  const EVENT_FIELDS = { name: 'name', type: 'type', date: 'date', venue: 'venue', mapsLink: 'maps_link', theme: 'theme', welcomeMessage: 'welcome_message' };
+
+  async function tableCall(q) {
+    let res;
+    try { res = await q; } catch (e) { throw normalizeError(e); }
+    if (res && res.error) throw normalizeError(res.error);
+    return res ? res.data : null;
+  }
+
+  const LIVE_POLL_MS = 5000;
+  const REQ_CHUNK = 25;
+  const REMOVE_CHUNK = 200;
+  const ADD_CHUNK = 2000;
+
+  function sortGuests(rows) {
+    return rows.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  }
+
+  const event = {
+    // The event row, or null (gone, or not yours).
+    async get(eventId) {
+      const row = await tableCall(client().from('events').select('*').eq('id', eventId).maybeSingle());
+      return row ? eventRow(row) : null;
+    },
+    // Owner fields only: name, type, date, venue, mapsLink, theme, welcomeMessage.
+    async update(eventId, fields) {
+      const payload = {};
+      Object.keys(fields || {}).forEach((k) => { if (EVENT_FIELDS[k]) payload[EVENT_FIELDS[k]] = fields[k]; });
+      if (!Object.keys(payload).length) throw new DataError('bad-input', 'nothing to update');
+      return write(async () => {
+        const rows = await tableCall(client().from('events').update(payload).eq('id', eventId).select('id'));
+        if (!Array.isArray(rows) || rows.length === 0) throw new DataError('permission', 'event not updated');
+      });
+    },
+    // The readable link name held now (or null).
+    async claimSlug(eventId, slug) {
+      const r = await write(() => rpc('claim_slug', { p_event_id: eventId, p_slug: slug == null ? '' : slug }));
+      return r || null;
+    },
+    async autoClaimSlug(eventId, base) {
+      const r = await write(() => rpc('auto_claim_slug', { p_event_id: eventId, p_base: base }));
+      return r || null;
+    },
+    // Admin. n 1..2000 activates with that guest limit, 0 takes the event back to the free plan.
+    async setGuestLimit(eventId, n) {
+      if (n === 0) { await write(() => rpc('admin_deactivate_event', { p_event_id: eventId })); return; }
+      if (!Number.isInteger(n) || n < 1 || n > 2000) throw new DataError('bad-input', 'guest limit out of range');
+      await write(() => rpc('admin_activate_event', { p_event_id: eventId, p_limit: n }));
+    },
+    // Live view of one event. ONE poll every 5 s asks event_live (one small row); the guest list is read
+    // again only when last_change moved (a delta from the cursor), the pending requests only when their
+    // count or newest time changed. Deleted guests come in the delta as tombstones; the whole list is read only
+    // on the first poll, on refresh({ full: true }), after a 6-day silence, or (at most once per 10 minutes)
+    // when the list size differs from guestCount on two polls in a row.
+    // cb.onLive({ guestCount, scannedCount, lastChange, pendingCount, newestPending, paid, guestLimit } | null when gone)
+    // cb.onGuests({ rows, full }) rows = the whole current list; cb.onRequests(list); cb.onError(err).
+    watch(eventId, cb) {
+      const o = cb || {};
+      let stopped = false;
+      const local = new Map();
+      let haveFull = false, cursor = null, seenChange, seenPending, seenNewest;
+      let lastOkAt = Date.now(), lastGhostAt = 0, mismatch = 0, forceFull = false;
+      async function once() {
+        const w = writes;
+        const live = firstRow(await rpc('event_live', { p_event_id: eventId }));
+        if (!live) return { w, gone: true };
+        const out = { w, live };
+        const now = Date.now();
+        const nextMap = new Map(local);
+        let nextCursor = cursor, full = false, changed = false;
+        const readFull = async () => {
+          const res = await readGuests((args) => rpc('owner_guests', args), eventId, null);
+          nextMap.clear();
+          res.rows.forEach((r) => nextMap.set(r.id, r));
+          nextCursor = res.cursor; full = true; changed = true;
+        };
+        const stale = now - lastOkAt > SYNC_MAX_GAP_MS;
+        if (!haveFull || forceFull || stale) {
+          await readFull();
+        } else if (live.last_change !== seenChange && !cursor) {
+          await readFull();
+        } else if (live.last_change !== seenChange) {
+          const res = await readGuests((args) => rpc('owner_guests', args), eventId, cursor);
+          res.rows.forEach((r) => { if (r.deleted) nextMap.delete(r.id); else nextMap.set(r.id, r); });
+          nextCursor = res.cursor; changed = true;
+        }
+        // deletions arrive as tombstones in the delta; a full read happens only when the list size still differs
+        // from guestCount on two polls in a row, at most once per GHOST_GAP_MS
+        if (!full && mismatch >= 1 && nextMap.size !== (live.guest_count || 0) && Date.now() - lastGhostAt >= GHOST_GAP_MS) {
+          out.ghostAt = Date.now();
+          await readFull();
+        }
+        out.off = nextMap.size !== (live.guest_count || 0);
+        out.map = nextMap; out.cursor = nextCursor; out.full = full; out.changed = changed;
+        const newest = live.newest_pending ? iso(live.newest_pending) : '';
+        if (seenPending === undefined || live.pending_count !== seenPending || newest !== seenNewest) {
+          out.requests = await requests.pending(eventId);
+        }
+        out.newest = newest;
+        return out;
+      }
+      const poller = makePoller(async () => {
+        let res = null;
+        try {
+          for (let tries = 0; tries < 3 && !stopped; tries++) {
+            await writesDone();
+            if (stopped) return;
+            const r = await once();
+            if (r.w === writes && !writing) { res = r; break; }
+          }
+        } catch (e) {
+          if (!stopped && o.onError) o.onError(e);
+          throw e;
+        }
+        if (stopped || !res) return;
+        if (res.gone) { if (o.onLive) o.onLive(null); return; }
+        const l = res.live;
+        seenChange = l.last_change; seenPending = l.pending_count; seenNewest = res.newest;
+        local.clear(); res.map.forEach((v, k) => local.set(k, v));
+        cursor = res.cursor; haveFull = true;
+        if (res.ghostAt) lastGhostAt = res.ghostAt;
+        mismatch = res.off ? mismatch + 1 : 0;
+        forceFull = false; lastOkAt = Date.now();
+        if (o.onLive) {
+          o.onLive({ guestCount: l.guest_count || 0, scannedCount: l.scanned_count || 0, lastChange: l.last_change || '', pendingCount: l.pending_count || 0,
+            newestPending: res.newest, paid: !!l.paid, guestLimit: l.guest_limit == null ? null : l.guest_limit });
+        }
+        if (res.changed && o.onGuests) o.onGuests({ rows: sortGuests(Array.from(local.values())), full: res.full });
+        if (res.requests && o.onRequests) o.onRequests(res.requests);
+      }, LIVE_POLL_MS, { hiddenIntervalMs: o.hiddenIntervalMs });
+      const handle = { eventId, forget(ids) { ids.forEach((id) => local.delete(id)); } };
+      watchers.add(handle);
+      poller.start();
+      return { stop() { stopped = true; watchers.delete(handle); poller.stop(); }, refresh(r) { if (r && r.full) forceFull = true; poller.refresh(); } };
+    },
+  };
+
+  const guests = {
+    // items: [{ name, vip? }]. Names over 100 characters are cut first; trimmed says how many.
+    // partial = false: all or nothing (blocked when they do not all fit); true: as many as fit.
+    // Returns { added, blocked, ids, trimmed }.
+    async add(eventId, items, partial) {
+      let trimmed = 0;
+      const list = (items || []).map((it) => {
+        const c = cutName(it && it.name);
+        if (c.cut) trimmed++;
+        return it && it.vip ? { name: c.name, vip: true } : { name: c.name };
+      });
+      if (!list.length) return { added: 0, blocked: false, ids: [], trimmed };
+      if (list.length > ADD_CHUNK && !partial) throw new DataError('bad-input', 'too many guests in one call');
+      return write(async () => {
+        let added = 0, blocked = false; const ids = [];
+        for (let i = 0; i < list.length; i += ADD_CHUNK) {
+          const row = firstRow(await rpc('add_guests', { p_event_id: eventId, p_guests: list.slice(i, i + ADD_CHUNK), p_partial: !!partial })) || {};
+          added += row.added || 0;
+          (row.ids || []).forEach((x) => ids.push(x));
+          if (row.blocked) { blocked = true; break; }
+        }
+        return { added, blocked, ids, trimmed };
+      });
+    },
+    async setScanned(eventId, guestId, scanned) {
+      return write(async () => (await rpc('set_guest_scanned', { p_event_id: eventId, p_guest_id: guestId, p_scanned: !!scanned })) === true);
+    },
+    async setVip(eventId, guestId, vip) {
+      return write(async () => (await rpc('set_guest', { p_event_id: eventId, p_guest_id: guestId, p_name: null, p_vip: !!vip })) === true);
+    },
+    async rename(eventId, guestId, name) {
+      return write(async () => (await rpc('set_guest', { p_event_id: eventId, p_guest_id: guestId, p_name: cutName(name).name, p_vip: null })) === true);
+    },
+    async remove(eventId, guestId) {
+      return write(async () => {
+        const ok = (await rpc('remove_guest', { p_event_id: eventId, p_guest_id: guestId })) === true;
+        forgetGuests(eventId, [guestId]);
+        return ok;
+      });
+    },
+    // Returns how many were removed.
+    async removeMany(eventId, ids) {
+      const all = Array.from(new Set(ids || []));
+      return write(async () => {
+        let n = 0;
+        for (let i = 0; i < all.length; i += REMOVE_CHUNK) {
+          const chunk = all.slice(i, i + REMOVE_CHUNK);
+          n += (await rpc('remove_guests', { p_event_id: eventId, p_ids: chunk })) || 0;
+          forgetGuests(eventId, chunk);
+        }
+        return n;
+      });
+    },
+    // The whole list, name order, read page by page.
+    async list(eventId) {
+      const res = await readGuests((args) => rpc('owner_guests', args), eventId, null);
+      return sortGuests(res.rows);
+    },
+  };
+
+  const requests = {
+    // Pending registration requests, oldest first, read page by page: [{ id, name, vip, createdAt }].
+    async pending(eventId) {
+      const out = [];
+      let afterCreated = null, afterId = null;
+      for (let pages = 0; pages < 100; pages++) {
+        const page = await rpc('owner_requests', { p_event_id: eventId, p_after_created: afterCreated, p_after_id: afterId, p_limit: 1000 });
+        const list = Array.isArray(page) ? page : [];
+        list.forEach((r) => out.push({ id: r.id, name: r.name, vip: !!r.vip, createdAt: iso(r.created_at) }));
+        if (list.length < 1000) break;
+        const last = list[list.length - 1];
+        afterCreated = last.created_at; afterId = last.id;
+      }
+      return out;
+    },
+    // items: [{ reqId, vip? }] approved in chunks of 25, oldest first; stops when the guest limit is reached.
+    // Returns { approved: [reqId], blocked }.
+    async approve(eventId, items) {
+      return write(async () => {
+        const approved = []; let blocked = false;
+        const list = items || [];
+        for (let i = 0; i < list.length; i += REQ_CHUNK) {
+          const chunk = list.slice(i, i + REQ_CHUNK).map((it) => (it.vip === undefined ? { req_id: it.reqId } : { req_id: it.reqId, vip: !!it.vip }));
+          const row = firstRow(await rpc('approve_requests', { p_event_id: eventId, p_items: chunk })) || {};
+          (row.approved || []).forEach((x) => approved.push(x));
+          if (row.blocked) { blocked = true; break; }
+        }
+        return { approved, blocked };
+      });
+    },
+    // true = it was pending and is now rejected.
+    async reject(eventId, reqId) {
+      return write(async () => (await rpc('reject_request', { p_event_id: eventId, p_req_id: reqId })) === true);
+    },
+  };
+
+  const door = {
+    // The current door code, or null.
+    async code(eventId) {
+      const row = await tableCall(client().from('event_secrets').select('scan_pin').eq('event_id', eventId).maybeSingle());
+      return row && row.scan_pin ? row.scan_pin : null;
+    },
+    // A new 6-digit code (every door device is signed out at once).
+    async regenerate(eventId) {
+      return write(() => rpc('regenerate_door_code', { p_event_id: eventId }));
+    },
+    // { failedLastHour, failedLastDay, doorLocked }
+    async alert(eventId) {
+      const row = firstRow(await rpc('door_alert', { p_event_id: eventId })) || {};
+      return { failedLastHour: row.failed_last_hour || 0, failedLastDay: row.failed_last_day || 0, doorLocked: !!row.door_locked };
+    },
+    // Clears the failed attempts; the code stays the same.
+    async reopen(eventId) {
+      return write(() => rpc('reset_door_attempts', { p_event_id: eventId }));
+    },
+  };
+
+  window.Data = { DataError, normalizeError, ready, platform, client, camel, iso, makePoller, timedFetch, invite, auth, scan, events, account, admin, event, guests, requests, door };
 })();
